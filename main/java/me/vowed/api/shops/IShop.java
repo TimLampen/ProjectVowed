@@ -26,6 +26,8 @@ import java.util.UUID;
  */
 public interface IShop
 {
+    void destroyShop(Player player);
+
     IShop getShop();
 
     Inventory getOwnerInventory();

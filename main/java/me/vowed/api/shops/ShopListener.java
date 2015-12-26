@@ -91,7 +91,7 @@ public class ShopListener implements Listener
         if (action == Action.RIGHT_CLICK_BLOCK)
         {
             Block block = interactEvent.getClickedBlock();
-            Location location = new Location(block.getWorld(), block.getLocation().getX(), block.getLocation().getY(), block.getLocation().getZ());
+            Location location = block.getLocation();
 
             if (block.getType() == Material.CHEST)
             {
@@ -131,6 +131,14 @@ public class ShopListener implements Listener
                         }
                     }
                 }
+            }
+        }
+        else if(action == Action.LEFT_CLICK_BLOCK){
+            if(ShopUtils.isShop(interactEvent.getClickedBlock())){
+                interactEvent.setCancelled(true);
+
+                IShop shop = Vowed.getShopManager().shopFromLocation(interactEvent.getClickedBlock().getLocation());
+                shop.destroyShop(player);
             }
         }
     }

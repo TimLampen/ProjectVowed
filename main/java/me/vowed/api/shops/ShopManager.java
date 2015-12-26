@@ -11,12 +11,14 @@ import org.bukkit.inventory.Inventory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * Created by JPaul on 11/13/2015.
  */
 public class ShopManager implements IShopManager
 {
+    HashMap<UUID, Shop> shop = new HashMap<>();
     ArrayList<IShop> shops = new ArrayList<>();
     HashMap<Location, IShop> locations = new HashMap<>();
 
@@ -28,7 +30,7 @@ public class ShopManager implements IShopManager
     @Override
     public IShop createShop(Player owner, Location location, ShopType shopType)
     {
-        IShop shop = new Shop(owner, owner.getName(), location, shopType);
+        IShop shop = new Shop(owner, this, owner.getName(), location, shopType);
         shops.add(shop);
         Location blockLocation = new Location(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
         Location blockRelativeLocation = blockLocation.getBlock().getRelative(BlockFace.WEST).getLocation();

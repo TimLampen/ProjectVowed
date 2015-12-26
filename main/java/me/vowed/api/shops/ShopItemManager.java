@@ -15,6 +15,7 @@ import java.util.UUID;
  */
 public class ShopItemManager
 {
+
     private static HashMap<IShop, List<ShopItem>> shopItems = new HashMap<>();
 
     public static List<ShopItem> getShopItems(IShop shop)
