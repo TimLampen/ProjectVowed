@@ -26,13 +26,7 @@ import java.util.Random;
 public class PetListener implements Listener
 {
     @EventHandler
-    public void on(PlayerDropItemEvent dropEvent)
-<<<<<<< HEAD
-    {
-=======
+    public void on(PlayerDropItemEvent dropEvent){
 
-
-{
->>>>>>> 2463725a5963a7c3741ccbc416c1f392b30ff8b0
     }
 }
