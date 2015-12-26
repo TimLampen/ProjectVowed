@@ -93,7 +93,6 @@ public class VowedPlugin extends JavaPlugin implements IVowedPlugin, Listener
 
         protocolManager = ProtocolLibrary.getProtocolManager();
         EffectLib effectLib = EffectLib.instance();
-        effectManager = new EffectManager(effectLib);
         HideEnchantsListener enchantsListener = new HideEnchantsListener(getServer(), getLogger());
         enchantsListener.addListener(protocolManager, getInstance());
 
