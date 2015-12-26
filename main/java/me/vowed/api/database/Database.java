@@ -42,6 +42,7 @@ public abstract class Database {
             return;
         }
 
+        int hud = 7;
         HikariConfig config = new HikariConfig();
 
         config.setJdbcUrl(jdbcURL);

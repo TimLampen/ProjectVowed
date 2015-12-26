@@ -27,15 +27,8 @@ public class PetListener implements Listener
 {
     @EventHandler
     public void on(PlayerDropItemEvent dropEvent)
-    {
-        Player player = dropEvent.getPlayer();
-        World world = ((CraftWorld) player.getWorld()).getHandle();
-        Wolf wolf = new Wolf(world, player);
-
-        wolf.setPosition(player.getLocation().getBlockX(), player.getLocation().getY() + 1, player.getLocation().getBlockZ());
-
-        world.addEntity(wolf, CreatureSpawnEvent.SpawnReason.CUSTOM);
 
 
+{
     }
 }
