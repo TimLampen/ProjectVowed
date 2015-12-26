@@ -1,12 +1,6 @@
-package me.vowed.api.race.test;
+package me.vowed.api.test;
 
-import me.vowed.api.player.PlayerWrapper;
 import me.vowed.api.plugin.Vowed;
-import me.vowed.api.race.Race;
-import me.vowed.api.race.RaceListener;
-import me.vowed.api.trade.Trade;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

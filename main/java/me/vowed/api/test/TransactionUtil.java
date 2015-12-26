@@ -1,4 +1,4 @@
-package me.vowed.api.race.test;
+package me.vowed.api.test;
 
 import me.vowed.api.plugin.Vowed;
 import org.json.simple.JSONArray;

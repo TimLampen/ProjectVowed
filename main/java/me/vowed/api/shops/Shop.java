@@ -1,33 +1,27 @@
 package me.vowed.api.shops;
 
-import com.comphenix.protocol.wrappers.collection.ConvertedMultimap;
 import me.vowed.api.player.PlayerWrapper;
 import me.vowed.api.plugin.Vowed;
-import net.minecraft.server.v1_8_R3.*;
+import net.minecraft.server.v1_8_R3.EntityArmorStand;
+import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.Chest;
-import org.bukkit.block.DoubleChest;
-import org.bukkit.craftbukkit.v1_8_R3.block.CraftChest;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftArmorStand;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftInventoryDoubleChest;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerPreLoginEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
-import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by JPaul on 10/15/2015.
@@ -108,8 +102,7 @@ public class Shop implements IShop
         if (player.getPlayer().getUniqueId().equals(getOwnerUUID()))
         {
             return getOwnerInventory();
-        }
-        else
+        } else
         {
             switch (player.getRace().getType())
             {
@@ -271,8 +264,7 @@ public class Shop implements IShop
         if (isOpen)
         {
             this.armourStand.setCustomName(ChatColor.GREEN + name);
-        }
-        else
+        } else
         {
             this.armourStand.setCustomName(ChatColor.RED + name);
         }
@@ -302,11 +294,13 @@ public class Shop implements IShop
     @Override
     public void changeName(String name)
     {
+        this.name = name;
+
         if (this.isOpen)
         {
+
             this.armourStand.setCustomName(ChatColor.GREEN + name);
-        }
-        else
+        } else
         {
             this.armourStand.setCustomName(ChatColor.RED + name);
         }
@@ -315,14 +309,6 @@ public class Shop implements IShop
     @Override
     public void createShop()
     {
-        if (this.location.getZ() < 0)
-        {
-            this.armourStandLocation = new Location(this.location.getWorld(), this.location.getX() - 0.47, this.location.getY() + 0.7, this.location.getZ());
-        } else if (this.location.getZ() >= 0)
-        {
-            this.armourStandLocation = new Location(this.location.getWorld(), this.location.getX(), this.location.getY() + 0.7, this.location.getZ() + 0.5);
-        }
-
         Block block = this.location.getBlock();
         Block blockRelative = block.getRelative(BlockFace.WEST);
 
@@ -331,6 +317,15 @@ public class Shop implements IShop
 
         block.setMetadata("shop", new FixedMetadataValue(Vowed.getPlugin(), true));
         blockRelative.setMetadata("shop", new FixedMetadataValue(Vowed.getPlugin(), true));
+
+
+        if (block.getZ() < 0)
+        {
+            this.armourStandLocation = new Location(this.location.getWorld(), block.getX(), block.getY() + 0.7, block.getZ() + 0.5);
+        } else if (block.getZ() >= 0)
+        {
+            this.armourStandLocation = new Location(this.location.getWorld(), block.getX(), block.getY() + 0.7, block.getZ() + 0.5);
+        }
 
         showName();
     }

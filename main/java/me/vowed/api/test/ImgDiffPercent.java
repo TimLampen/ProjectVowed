@@ -1,10 +1,9 @@
-package me.vowed.api.race.test;
+package me.vowed.api.test;
 
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 
 public class ImgDiffPercent
 {

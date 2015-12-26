@@ -7,7 +7,7 @@ import me.vowed.api.database.Database;
 import me.vowed.api.health.IHealthManager;
 import me.vowed.api.money.IMoneyManager;
 import me.vowed.api.race.IRaceManager;
-import me.vowed.api.race.test.ShopData;
+import me.vowed.api.test.ShopData;
 import me.vowed.api.shops.IShopManager;
 import org.bukkit.plugin.Plugin;
 

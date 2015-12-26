@@ -1,4 +1,4 @@
-package me.vowed.api.race.test;
+package me.vowed.api.test;
 
 /**
  * Created by JPaul on 12/26/2015.

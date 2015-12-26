@@ -1,7 +1,5 @@
-package me.vowed.api.race.test;
+package me.vowed.api.test;
 
-import com.sun.imageio.plugins.gif.GIFImageReader;
-import com.sun.imageio.plugins.gif.GIFImageReaderSpi;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -25,7 +23,7 @@ public class TEST
 {
     public static void main(String[] args) throws IOException
     {
-        File file = new File("C:\\Users\\JPaul\\Desktop\\Server\\plugins\\VowedCore\\Transactions\\TEST1.gif");
+        File file = new File("C:\\Users\\JPaul\\Desktop\\Server\\plugins\\VowedCore\\Transactions\\TEST2.gif");
 
         ImageReader reader = ImageIO.getImageReadersByFormatName("gif").next();
         ImageInputStream stream = ImageIO.createImageInputStream(file);
@@ -37,12 +35,14 @@ public class TEST
 
         for (ImageFrame imageFrame : imageFrames)
         {
-
-
-                    JFrame frame = new JFrame();
-                    frame.getContentPane().add(new JLabel(new ImageIcon(imageFrame.getImage())));
-                    frame.pack();
-                    frame.setVisible(true);
+            if (compareImages(imageFrame.getImage(), ImageIO.read(new File("C:\\Users\\JPaul\\Desktop\\Server\\plugins\\VowedCore\\Transactions\\GIF" + counter + ".png"))))
+            {
+                System.out.println(true);
+            }
+            else
+            {
+                System.out.println(false);
+            }
 
 
             counter++;

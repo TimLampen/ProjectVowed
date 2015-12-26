@@ -22,7 +22,7 @@ import me.vowed.api.player.PlayerWrapperListener;
 import me.vowed.api.race.IRaceManager;
 import me.vowed.api.race.RaceListener;
 import me.vowed.api.race.RaceManager;
-import me.vowed.api.race.test.ShopData;
+import me.vowed.api.test.ShopData;
 import me.vowed.api.shops.*;
 import me.vowed.api.skins.SkinHandler;
 import me.vowed.api.skins.SkinUtil;
@@ -104,7 +104,6 @@ public class VowedPlugin extends JavaPlugin implements IVowedPlugin, Listener
     {
         DATA_POOL.disconnect();
         instance = null;
-        effectManager.dispose();
         TRANSACTIONS.dispose();
 
         SkinUtil.saveSkins();
