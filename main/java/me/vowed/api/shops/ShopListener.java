@@ -332,7 +332,10 @@ public class ShopListener implements Listener
                         {
                             shop.removeItem(shopItem);
 
-                            shopItem.addPrice(Integer.parseInt(chatEvent.getMessage()), shop);
+                            shopItem.
+                                    addPrice(
+                                    Integer.parseInt(chatEvent.getMessage()),
+                                    shop);
                             shop.addItemWithPrice(shopItem);
 
                             player.getInventory().remove(shopItem.getShopItem());
