@@ -236,9 +236,6 @@ public class GifSequenceWriter
             counter++;
         }
         gifEncoder.finish();
-
-        MapView mapView;
-        mapView.ad
     }
 
     public static boolean compareImages(BufferedImage imgA, BufferedImage imgB) {

@@ -40,21 +40,26 @@ public class Shop implements IShop
     private Inventory humanInventory;
     private Inventory ownerInventory;
     private ArmorStand armourStand;
+    private ShopManager manager;
+    private Location block1;
+    private Location block2;
+
 
     public static HashMap<Player, IShop> iShopLocaterPlayer = new HashMap<>();
     public static HashMap<Location, IShop> iShopLocaterLocation = new HashMap<>();
     private HashMap<IShop, List<ShopItem>> shopInventory = new HashMap<>();
-    HashMap<UUID, IShop> shop = new HashMap<>();
 
 
-    public Shop(Player player, String name, Location location, ShopType shopType)
+
+    public Shop(Player player, ShopManager manager, String name, Location location, ShopType shopType)
     {
         this.owner = player.getUniqueId();
         this.name = name;
         this.contents = new ArrayList<>();
         this.location = location;
-        this.shop.put(player.getUniqueId(), this);
+        manager.shop.put(player.getUniqueId(), this);
         this.shopType = shopType;
+        this.manager = manager;
         this.elfInventory = Bukkit.createInventory(player, 18, ChatColor.YELLOW.toString() + ChatColor.BOLD + player.getName() + "'s Shop - Elf");
         this.dwarfInventory = Bukkit.createInventory(player, 18, ChatColor.YELLOW.toString() + ChatColor.BOLD + player.getName() + "'s Shop - Dwarf");
         this.humanInventory = Bukkit.createInventory(player, 18, ChatColor.YELLOW.toString() + ChatColor.BOLD + player.getName() + "'s Shop - Human");
@@ -69,7 +74,7 @@ public class Shop implements IShop
     @Override
     public IShop getShop()
     {
-        return this.shop.get(owner);
+        return manager.shop.get(owner);
     }
 
     @Override
@@ -294,8 +299,9 @@ public class Shop implements IShop
     @Override
     public void changeName(String name)
     {
+        Vowed.LOG.debug(name);
+        Vowed.LOG.debug(isOpen);
         this.name = name;
-
         if (this.isOpen)
         {
             this.armourStand.setCustomName(ChatColor.GREEN + name);
@@ -314,25 +320,56 @@ public class Shop implements IShop
         block.setType(Material.CHEST);
         blockRelative.setType(Material.CHEST);
 
+        block1 = block.getLocation();
+        block2 = blockRelative.getLocation();
+
         block.setMetadata("shop", new FixedMetadataValue(Vowed.getPlugin(), true));
         blockRelative.setMetadata("shop", new FixedMetadataValue(Vowed.getPlugin(), true));
 
 
         if (block.getZ() < 0)
         {
-            this.armourStandLocation = new Location(this.location.getWorld(), block.getX(), block.getY() + 0.7, block.getZ() + 0.5);
+            this.armourStandLocation = new Location(this.location.getWorld(), block.getX(), block.getY(), block.getZ() + 0.5);
         } else if (block.getZ() >= 0)
         {
-            this.armourStandLocation = new Location(this.location.getWorld(), block.getX(), block.getY() + 0.7, block.getZ() + 0.5);
+            this.armourStandLocation = new Location(this.location.getWorld(), block.getX(), block.getY(), block.getZ() + 0.5);
         }
 
         showName();
     }
 
+
     @Override
     public void saveContents()
     {
-        this.shopInventory.put(shop.get(owner), this.getContents());
+        this.shopInventory.put(manager.shop.get(owner), this.getContents());
+    }
+
+    @Override
+    public void destroyShop(Player requester){
+            if (!isOpen()) {
+                if (manager.isOwner(this, requester)) {
+                    manager.shops.remove(this);
+                    manager.locations.remove(block1);
+                    manager.locations.remove(block2);
+                    manager.shop.remove(getOwnerUUID());
+                    Vowed.LOG.debug(manager.shop.toString());
+                    block1.getWorld().getBlockAt(block1).setType(Material.AIR);
+                    block2.getWorld().getBlockAt(block2).setType(Material.AIR);
+                    armourStand.remove();
+
+                    for(ShopItem item : contents){
+
+                    }
+                    requester.sendMessage(ChatColor.GREEN + "You have removed your shop");
+                }
+                else{
+                    requester.sendMessage(ChatColor.RED + "You are not the owner of this shop!");
+                }
+            }
+            else {
+                requester.sendMessage(ChatColor.RED + "The shop has to be closed for this action to be done!");
+            }
     }
 
 }
