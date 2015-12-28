@@ -298,7 +298,6 @@ public class Shop implements IShop
 
         if (this.isOpen)
         {
-
             this.armourStand.setCustomName(ChatColor.GREEN + name);
         } else
         {

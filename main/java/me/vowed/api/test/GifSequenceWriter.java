@@ -1,17 +1,21 @@
 package me.vowed.api.test;
 
+import com.gif4j.GifEncoder;
+import com.gif4j.GifFrame;
+import com.gif4j.GifImage;
+import org.bukkit.Bukkit;
+import org.bukkit.map.MapCanvas;
+import org.bukkit.map.MapView;
+
 import javax.imageio.*;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.metadata.IIOMetadataNode;
-import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by JPaul on 12/26/2015.
@@ -154,39 +158,108 @@ public class GifSequenceWriter
     {
         // grab the output image type from the first image in the sequence
 
-        File folder = new File("C:\\Users\\JPaul\\Desktop\\Server\\plugins\\VowedCore\\Transactions\\");
+        sortByNumber();
 
-        List<File> images = new ArrayList<>();
+    }
 
-        for (File file : folder.listFiles())
+    public static void sortByNumber() throws IOException
+    {
+        File folder = new File("C:\\Users\\JPaul\\Desktop\\Server\\plugins\\VowedCore\\Transactions\\images\\templateImages");
+
+        File[] files = folder.listFiles();
+
+        Arrays.sort(files, new Comparator<File>()
         {
-            if (file.getName().startsWith("GIF"))
+            @Override
+            public int compare(File o1, File o2)
             {
-                images.add(file);
+                int n1 = extractNumber(o1.getName());
+                int n2 = extractNumber(o2.getName());
+                return n1 - n2;
             }
-        }
 
+            private int extractNumber(String name)
+            {
+                int i = 0;
+                try
+                {
+                    int s = name.indexOf('F') + 1;
+                    int e = name.lastIndexOf('.');
+                    String number = name.substring(s, e);
+                    i = Integer.parseInt(number);
+                } catch (Exception e)
+                {
+                    i = 0; // if filename does not match the format
+                    // then default to 0
+                }
+                return i;
+            }
+        });
 
-        BufferedImage firstImage = ImageIO.read(images.get(0));
+        AnimatedGifEncoder gifEncoder = new AnimatedGifEncoder();
+        gifEncoder.start("C:\\Users\\JPaul\\Desktop\\Server\\plugins\\VowedCore\\Transactions\\images\\GIFResult.gif");
+        gifEncoder.setDelay(1000);
 
-        // create a new BufferedOutputStream with the last argument
-        ImageOutputStream output =
-                new FileImageOutputStream(new File(args[args.length - 1]));
+        int counter = 0;
 
-        // create a gif sequence with the type of the first image, 1 second
-        // between frames, which loops continuously
-        GifSequenceWriter writer =
-                new GifSequenceWriter(output, firstImage.getType(), 1, false);
+        double random = Math.random();
 
-        // write out the first image to our sequence...
-        writer.writeToSequence(firstImage);
-        for (int i = 1; i < args.length - 1; i++)
+        for (File file : files)
         {
-            BufferedImage nextImage = ImageIO.read(images.get(i));
-            writer.writeToSequence(nextImage);
+            Random random1 = new Random();
+
+            BufferedImage image = ImageIO.read(files[random1.nextInt(5)]);
+
+
+            if (counter == files.length - 1)
+            {
+                if (random < 0.3)
+                {
+                    gifEncoder.addFrame(ImageIO.read(files[random1.nextInt(5)]));
+                    System.out.println(random);
+                }
+                else if (random < 0.7)
+                {
+                    gifEncoder.addFrame(ImageIO.read(files[6]));
+                    System.out.println("WINNN");
+                }
+                else
+                {
+                    System.out.println(random);
+                }
+            }
+            else
+            {
+                gifEncoder.addFrame(image);
+            }
+
+            counter++;
+        }
+        gifEncoder.finish();
+
+        MapView mapView;
+        mapView.ad
+    }
+
+    public static boolean compareImages(BufferedImage imgA, BufferedImage imgB) {
+        // The images must be the same size.
+        if (imgA.getWidth() == imgB.getWidth() && imgA.getHeight() == imgB.getHeight()) {
+            int width = imgA.getWidth();
+            int height = imgA.getHeight();
+
+            // Loop over every pixel.
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    // Compare the pixels for equality.
+                    if (imgA.getRGB(x, y) != imgB.getRGB(x, y)) {
+                        return false;
+                    }
+                }
+            }
+        } else {
+            return false;
         }
 
-        writer.close();
-        output.close();
+        return true;
     }
 }
