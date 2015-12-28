@@ -24,6 +24,8 @@ import org.json.simple.parser.JSONParser;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -42,37 +44,17 @@ public class RaceListener implements Listener
     {
         Player player = joinEvent.getPlayer();
 
-        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy_hh-mm-ss_a");
-        Date date = new Date();
-        Vowed.LOG.debug(dateFormat.format(date));
+        PreparedStatement setFirstLogin = Vowed.getDatabase().prepareStatement("INSERT INTO player_info ('UUID', 'first_login') VALUES ('" + player.getUniqueId().toString() + "', 'FALSE');");
+        setFirstLogin.executeUpdate();
 
-        File data = new File("C:\\Users\\ProjectVowed\\plugins\\VowedCore\\Transactions\\DATA");
-        if (!data.exists())
-        {
-            data.mkdir();
-        }
+        PreparedStatement getRace = Vowed.getDatabase().prepareStatement("SELECT UUID FROM player_info");
+        getRace.executeUpdate();
+        ResultSet resultSet = Vowed.getDatabase().getResultSet(getRace);
 
-        File nameList = new File("C:\\Users\\ProjectVowed\\plugins\\VowedCore\\Transactions\\DATA\\names.dataList");
-        if (!nameList.exists())
+        if (resultSet.next())
         {
-            nameList.createNewFile();
+            Vowed.LOG.debug(resultSet.toString());
         }
-
-        List<String> namesofFile = new ArrayList<>();
-        Scanner scanner = new Scanner(nameList);
-        while (scanner.hasNextLine())
-        {
-            namesofFile.add(scanner.nextLine());
-        }
-
-        FileWriter fileWriter = new FileWriter(nameList, true);
-        PrintWriter printWriter = new PrintWriter(fileWriter);
-        if (!namesofFile.contains(player.getName()))
-        {
-            printWriter.println(player.getName());
-        }
-        printWriter.close();
-        fileWriter.close();
 
         new BukkitRunnable()
         {

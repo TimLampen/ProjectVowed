@@ -360,6 +360,8 @@ public class Shop implements IShop
 
                     for(ShopItem item : contents) {
                         Vowed.LOG.debug(item.getShopItem().toString());
+                        item.removePrice();
+                        Vowed.LOG.debug(item.getShopItem().toString());
                     }
                     requester.sendMessage(ChatColor.GREEN + "You have removed your shop");
                 }

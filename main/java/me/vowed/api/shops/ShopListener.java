@@ -57,9 +57,39 @@ public class ShopListener implements Listener
     private HashMap<UUID, Boolean> handlingName = new HashMap<>();
 
     @EventHandler
-    public void on(PlayerJoinEvent joinEvent)
+    public void on(PlayerJoinEvent joinEvent) throws IOException
     {
-        isInShop.put(joinEvent.getPlayer().getUniqueId(), false);
+        Player player = joinEvent.getPlayer();
+
+        isInShop.put(player.getUniqueId(), false);
+
+        File data = new File("C:\\ProjectVowed\\plugins\\VowedCore\\Transactions\\DATA");
+        if (!data.exists())
+        {
+            data.mkdir();
+        }
+
+        File nameList = new File("C:\\ProjectVowed\\plugins\\VowedCore\\Transactions\\DATA\\names.dataList");
+        if (!nameList.exists())
+        {
+            nameList.createNewFile();
+        }
+
+        List<String> namesofFile = new ArrayList<>();
+        Scanner scanner = new Scanner(nameList);
+        while (scanner.hasNextLine())
+        {
+            namesofFile.add(scanner.nextLine());
+        }
+
+        FileWriter fileWriter = new FileWriter(nameList, true);
+        PrintWriter printWriter = new PrintWriter(fileWriter);
+        if (!namesofFile.contains(player.getName()))
+        {
+            printWriter.println(player.getName());
+        }
+        printWriter.close();
+        fileWriter.close();
     }
 
     @EventHandler

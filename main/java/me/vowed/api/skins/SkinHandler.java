@@ -20,7 +20,7 @@ public class SkinHandler implements Listener
     {
         Player player = joinEvent.getPlayer();
 
-        File file = new File("C:\\Users\\ProjectVowed\\VowedCore\\SkinManager\\" + player.getUniqueId().toString() + ".skinData");
+        File file = new File("C:\\ProjectVowed\\plugins\\VowedCore\\SkinManager\\" + player.getUniqueId().toString() + ".skinData");
         FileReader fileReader = new FileReader(file);
         BufferedReader reader = new BufferedReader(fileReader);
 

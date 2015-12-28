@@ -104,7 +104,6 @@ public class VowedPlugin extends JavaPlugin implements IVowedPlugin, Listener
     {
         DATA_POOL.disconnect();
         instance = null;
-        TRANSACTIONS.dispose();
 
         SkinUtil.saveSkins();
     }
