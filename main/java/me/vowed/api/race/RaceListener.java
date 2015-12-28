@@ -43,34 +43,44 @@ public class RaceListener implements Listener
     public void on(PlayerJoinEvent joinEvent) throws SQLException, IOException
     {
         Player player = joinEvent.getPlayer();
+        PlayerWrapper playerWrapper = new PlayerWrapper(player);
 
-        PreparedStatement setFirstLogin = Vowed.getDatabase().prepareStatement("INSERT INTO player_info ('UUID', 'first_login') VALUES ('" + player.getUniqueId().toString() + "', 'FALSE');");
+        PreparedStatement setFirstLogin = Vowed.getDatabase().prepareStatement("INSERT INTO player_info (UUID, first_login) " +
+                "VALUES ('" + player.getUniqueId().toString() + "', TRUE) " +
+                "ON DUPLICATE KEY UPDATE first_login = FALSE");
         setFirstLogin.executeUpdate();
 
-        PreparedStatement getRace = Vowed.getDatabase().prepareStatement("SELECT UUID FROM player_info");
-        getRace.executeUpdate();
+        PreparedStatement getRace = Vowed.getDatabase().prepareStatement("SELECT * FROM player_info WHERE UUID = '" + player.getUniqueId().toString() + "'");
+        getRace.execute();
         ResultSet resultSet = Vowed.getDatabase().getResultSet(getRace);
 
         if (resultSet.next())
         {
-            Vowed.LOG.debug(resultSet.toString());
+            Vowed.LOG.debug(resultSet.getString("UUID"));
+            Vowed.LOG.debug(resultSet.getBoolean("first_login"));
         }
 
-        new BukkitRunnable()
-        {
-            @Override
-            public void run()
-            {
-                player.sendRawMessage(ChatColor.YELLOW.toString() + ChatColor.BOLD + "Enter your desired Race + Gender");
-            }
-        }.runTaskLater(Vowed.getPlugin(), 30);
-    }
+        Boolean firstLogin = resultSet.getBoolean("first_login");
 
-    @EventHandler
-    public void on(PlayerEggThrowEvent eggThrowEvent)
-    {
-        Player player = eggThrowEvent.getPlayer();
-        this.isHandling.put(player.getUniqueId(), true);
+        if (firstLogin)
+        {
+            new BukkitRunnable()
+            {
+                @Override
+                public void run()
+                {
+                    player.sendRawMessage(ChatColor.YELLOW.toString() + ChatColor.BOLD + "Enter your desired Race + Gender");
+                    isHandling.put(player.getUniqueId(), true);
+                }
+            }.runTaskLater(Vowed.getPlugin(), 30);
+        } else
+        {
+            String race = resultSet.getString("race");
+            String gender = resultSet.getString("gender");
+            Race playerRace = Vowed.getRaceManager().getRace(race, Gender.valueOf(gender.toUpperCase()));
+            Vowed.LOG.debug(race + " " + gender + "!");
+            playerWrapper.setRace(playerRace);
+        }
     }
 
     @EventHandler

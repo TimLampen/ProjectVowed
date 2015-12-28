@@ -7,6 +7,8 @@ import me.vowed.api.race.races.Gender;
 import me.vowed.api.race.races.Human;
 import org.bukkit.entity.Player;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -28,7 +30,7 @@ public class RaceManager implements IRaceManager
     @Override
     public Race getRace(String string, Gender gender)
     {
-        switch (string)
+        switch (string.toUpperCase())
         {
             case "ELF":
                 return new Elf(gender);
@@ -47,6 +49,18 @@ public class RaceManager implements IRaceManager
         if (!this.races.containsKey(player.getUniqueId()))
         {
             this.races.put(player.getUniqueId(), race);
+
+            try
+            {
+                PreparedStatement setRace = Vowed.getDatabase().prepareStatement("INSERT INTO player_info (UUID, race, gender) " +
+                    "VALUES ('" + player.getUniqueId().toString() + "', '" + race.getName().toLowerCase() + "', '" + race.getGender().toString().toUpperCase() + "') " +
+                    "ON DUPLICATE KEY UPDATE race = '" + race.getName() + "', gender = '" + race.getGender() + "'");
+                Vowed.LOG.debug(setRace.toString());
+                setRace.executeUpdate();
+            } catch (SQLException e)
+            {
+                e.printStackTrace();
+            }
         }
     }
 
