@@ -124,7 +124,7 @@ public class VowedPlugin extends JavaPlugin implements IVowedPlugin, Listener
 
         DATA_POOL.connect();
 
-        PreparedStatement preparedStatement = DATA_POOL.prepareStatement("CREATE TABLE IF NOT EXISTS " + "player_info" + "(UUID VARCHAR(32) PRIMARY KEY, first_login BOOL, race VARCHAR(32));");
+        PreparedStatement preparedStatement = DATA_POOL.prepareStatement("CREATE TABLE IF NOT EXISTS " + "player_info" + "(UUID VARCHAR(36) PRIMARY KEY, first_login BOOL, race VARCHAR(32), gender VARCHAR(10));");
 
         DATA_POOL.execute(preparedStatement);
     }
