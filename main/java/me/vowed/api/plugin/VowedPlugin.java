@@ -73,6 +73,13 @@ public class VowedPlugin extends JavaPlugin implements IVowedPlugin, Listener
 
         prepareDatabase();
 
+
+        DAMAGE_MANAGER = new Damage();
+        HEALTH_MANAGER = new HealthManager();
+        SHOP_MANAGER = new ShopManager();
+        MONEY_MANAGER = new MoneyManager();
+        RACE_MANAGER = new RaceManager();
+
         getInstance().getServer().getPluginManager().registerEvents(new PlayerWrapperListener(), getInstance());
         getInstance().getServer().getPluginManager().registerEvents(new Test(), getInstance());
         getInstance().getServer().getPluginManager().registerEvents(new RaceListener(), getInstance());
@@ -83,11 +90,7 @@ public class VowedPlugin extends JavaPlugin implements IVowedPlugin, Listener
         getInstance().getServer().getPluginManager().registerEvents(new DamagePlayer(), getInstance());
         getInstance().getServer().getPluginManager().registerEvents(this, getInstance());
 
-        DAMAGE_MANAGER = new Damage();
-        HEALTH_MANAGER = new HealthManager();
-        SHOP_MANAGER = new ShopManager();
-        MONEY_MANAGER = new MoneyManager();
-        RACE_MANAGER = new RaceManager();
+
         DISGUISE_MANAGER = getServer().getServicesManager().getRegistration(DisguiseAPI.class).getProvider();
         TRANSACTIONS = null;
 

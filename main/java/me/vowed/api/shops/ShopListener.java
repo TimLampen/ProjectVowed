@@ -56,6 +56,7 @@ public class ShopListener implements Listener
     private HashMap<UUID, Boolean> isInShop = new HashMap<>();
     private HashMap<UUID, Boolean> handlingName = new HashMap<>();
 
+
     @EventHandler
     public void on(PlayerJoinEvent joinEvent) throws IOException
     {
@@ -92,24 +93,34 @@ public class ShopListener implements Listener
         fileWriter.close();
     }
 
+
     @EventHandler
-    public void on(PlayerDropItemEvent dropItemEvent)
-    {
-        Player player = dropItemEvent.getPlayer();
+    public void onInteract(PlayerInteractEvent event){
+        Player player = event.getPlayer();
+        if(event.getAction()==Action.RIGHT_CLICK_BLOCK){
+            if(player.isSneaking() && player.getItemInHand()!=null && player.getItemInHand().getType()==Material.BOOK){
+                if(Vowed.getShopManager().getShop(player) == null){
+                    Location loc = event.getClickedBlock().getLocation();
+                    IShop shop = Vowed.getShopManager().createShop(player, loc.add(0, 1, 0), ShopType.GEAR_SHOP);
+                    shop.createShop();
 
-        IShop shop = Vowed.getShopManager().createShop(player, player.getLocation().subtract(0, 1, 0), ShopType.GEAR_SHOP);
-        shop.createShop();
+                    openButton = new UniqueItem(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 5), UUID.randomUUID().toString().toUpperCase().substring(0, 6));
+                    openButtonItem = new ShopItem(openButton);
 
-        openButton = new UniqueItem(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 5), UUID.randomUUID().toString().toUpperCase().substring(0, 6));
-        openButtonItem = new ShopItem(openButton);
+                    closeButton = new UniqueItem(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 14), UUID.randomUUID().toString().toUpperCase().substring(0, 6));
+                    closeButtonItem = new ShopItem(closeButton);
 
-        closeButton = new UniqueItem(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 14), UUID.randomUUID().toString().toUpperCase().substring(0, 6));
-        closeButtonItem = new ShopItem(closeButton);
-
-        shop.setOpen(false);
-        handlingName.put(shop.getOwnerUUID(), true);
-        shop.getOwner().sendMessage(ChatColor.YELLOW.toString() + ChatColor.BOLD + "Please enter your shop's name");
+                    shop.setOpen(false);
+                    handlingName.put(shop.getOwnerUUID(), true);
+                    shop.getOwner().sendMessage(ChatColor.YELLOW.toString() + ChatColor.BOLD + "Please enter your shop's name");
+                }
+                else{
+                    player.sendMessage(ChatColor.RED + "You cannot create a shop while you already have one open!");
+                }
+            }
+        }
     }
+
 
     @EventHandler
     public void on(PlayerInteractEvent interactEvent)
@@ -186,7 +197,11 @@ public class ShopListener implements Listener
             {
                 IShop shop = Vowed.getShopManager().shopFromLocation(shopLocation);
 
-                if (inventory.equals(shop.getInventory(playerWrapper)) && !handlingItem)
+                if (inventory
+                        .equals(
+                                shop.getInventory(
+                                        playerWrapper)) &&
+                        !handlingItem)
                 {
                     isInShop.put(player.getUniqueId(), false);
                 }
