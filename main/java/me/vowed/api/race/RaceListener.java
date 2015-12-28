@@ -46,13 +46,13 @@ public class RaceListener implements Listener
         Date date = new Date();
         Vowed.LOG.debug(dateFormat.format(date));
 
-        File data = new File("C:\\Users\\Primary\\Desktop\\Test Map\\plugins\\VowedCore\\Transactions\\DATA");
+        File data = new File("C:\\Users\\ProjectVowed\\plugins\\VowedCore\\Transactions\\DATA");
         if (!data.exists())
         {
             data.mkdir();
         }
 
-        File nameList = new File("C:\\Users\\Primary\\Desktop\\Test Map\\plugins\\VowedCore\\Transactions\\DATA\\names.dataList");
+        File nameList = new File("C:\\Users\\ProjectVowed\\plugins\\VowedCore\\Transactions\\DATA\\names.dataList");
         if (!nameList.exists())
         {
             nameList.createNewFile();

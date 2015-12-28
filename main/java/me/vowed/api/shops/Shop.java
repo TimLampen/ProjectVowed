@@ -358,8 +358,8 @@ public class Shop implements IShop
                     block2.getWorld().getBlockAt(block2).setType(Material.AIR);
                     armourStand.remove();
 
-                    for(ShopItem item : contents){
-
+                    for(ShopItem item : contents) {
+                        Vowed.LOG.debug(item.getShopItem().toString());
                     }
                     requester.sendMessage(ChatColor.GREEN + "You have removed your shop");
                 }

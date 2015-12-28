@@ -122,7 +122,7 @@ public class ShopData extends JFrame
 
         });
 
-        File nameList = new File("C:\\Users\\JPaul\\Desktop\\Server\\plugins\\VowedCore\\Transactions\\DATA\\names.dataList");
+        File nameList = new File("C:\\Users\\ProjectVowed\\plugins\\VowedCore\\Transactions\\DATA\\names.dataList");
 
         List<String> namesofFile = new ArrayList<>();
 
