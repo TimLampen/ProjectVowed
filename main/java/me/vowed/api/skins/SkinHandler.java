@@ -17,18 +17,19 @@ import java.util.List;
 public class SkinHandler implements Listener
 {
 
-    VowedPlugin p;
+    VowedPlugin plugin;
     SkinUtil skinUtil;
-    public SkinHandler(VowedPlugin p, SkinUtil skinUtil){
-        this.p = p;
+    public SkinHandler(VowedPlugin plugin, SkinUtil skinUtil){
+        this.plugin = plugin;
         this.skinUtil = skinUtil;
     }
+
     @EventHandler
     public void onRaceLogin(PlayerJoinEvent joinEvent) throws SQLException, FileNotFoundException
     {
         Player player = joinEvent.getPlayer();
 
-        File file = new File(p.getDataFolder() + File.separator + "SkinManager" + File.separator + player.getUniqueId().toString() + ".skinData");
+        File file = new File(plugin.getDataFolder() + File.separator + "SkinManager" + File.separator + player.getUniqueId().toString() + ".skinData");
         FileReader fileReader = new FileReader(file);
         BufferedReader reader = new BufferedReader(fileReader);
 

@@ -23,7 +23,7 @@ import me.vowed.api.money.MoneyManager;
 import me.vowed.api.pets.PetListener;
 import me.vowed.api.player.PlayerWrapperListener;
 import me.vowed.api.race.IRaceManager;
-import me.vowed.api.race.listeners.EntityShootListener;
+import me.vowed.api.race.listeners.elf.EntityShootListener;
 import me.vowed.api.race.listeners.RaceListener;
 import me.vowed.api.race.RaceManager;
 import me.vowed.api.utils.ShopData;

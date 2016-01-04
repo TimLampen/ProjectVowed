@@ -1,4 +1,4 @@
-package me.vowed.api.race.listeners;
+package me.vowed.api.race.listeners.elf;
 
 import me.vowed.api.player.PlayerWrapper;
 import me.vowed.api.plugin.Vowed;

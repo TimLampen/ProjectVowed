@@ -40,10 +40,12 @@ public class RaceListener implements Listener
 {
     private HashMap<UUID, Boolean> isHandling = new HashMap<>();
     private List<String> raceNames = Arrays.asList("Dwarf", "Elf", "Human");
-    VowedPlugin p;
+
+    VowedPlugin plugin;
     SkinUtil skinUtil;
-    public RaceListener(VowedPlugin p, SkinUtil skinUtil){
-        this.p = p;
+
+    public RaceListener(VowedPlugin plugin, SkinUtil skinUtil){
+        this.plugin = plugin;
         this.skinUtil = skinUtil;
     }
     @EventHandler
