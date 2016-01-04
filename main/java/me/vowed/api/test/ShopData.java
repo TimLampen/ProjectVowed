@@ -1,6 +1,7 @@
 package me.vowed.api.test;
 
 import me.vowed.api.plugin.Vowed;
+import me.vowed.api.plugin.VowedPlugin;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -24,12 +25,13 @@ public class ShopData extends JFrame
 {
     JTable table;
     DefaultTableModel tableModel;
+    static VowedPlugin p;
 
-    public ShopData()
+    public ShopData(VowedPlugin p)
     {
         super("Shop");
         super.setSize(1000, 900);
-
+        this.p = p;
         JPanel panel = new JPanel();
 
         panel.setLayout(null);
@@ -122,7 +124,7 @@ public class ShopData extends JFrame
 
         });
 
-        File nameList = new File("C:\\ProjectVowed\\plugins\\VowedCore\\Transactions\\DATA\\names.dataList");
+        File nameList = new File(p.getDataFolder() + "Transactions\\DATA\\names.dataList");
 
         List<String> namesofFile = new ArrayList<>();
 
@@ -611,6 +613,6 @@ public class ShopData extends JFrame
 
     public static void main(String[] args)
     {
-        new ShopData();
+        new ShopData(p);
     }
 }
