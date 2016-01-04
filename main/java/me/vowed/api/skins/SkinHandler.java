@@ -1,5 +1,6 @@
 package me.vowed.api.skins;
 
+import me.vowed.api.plugin.VowedPlugin;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,12 +16,19 @@ import java.util.List;
  */
 public class SkinHandler implements Listener
 {
+
+    VowedPlugin p;
+    SkinUtil skinUtil;
+    public SkinHandler(VowedPlugin p, SkinUtil skinUtil){
+        this.p = p;
+        this.skinUtil = skinUtil;
+    }
     @EventHandler
     public void onRaceLogin(PlayerJoinEvent joinEvent) throws SQLException, FileNotFoundException
     {
         Player player = joinEvent.getPlayer();
 
-        File file = new File("C:\\ProjectVowed\\plugins\\VowedCore\\SkinManager\\" + player.getUniqueId().toString() + ".skinData");
+        File file = new File(p.getDataFolder() + File.separator + "SkinManager" + File.separator + player.getUniqueId().toString() + ".skinData");
         FileReader fileReader = new FileReader(file);
         BufferedReader reader = new BufferedReader(fileReader);
 
@@ -52,6 +60,6 @@ public class SkinHandler implements Listener
 
         Skin skin = new Skin(cool.get(0), cool.get(1), cool.get(2));
 
-        SkinUtil.setSkin(player, skin);
+        skinUtil.setSkin(player, skin);
     }
 }

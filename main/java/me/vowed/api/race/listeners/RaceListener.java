@@ -1,8 +1,10 @@
-package me.vowed.api.race;
+package me.vowed.api.race.listeners;
 
 import me.vowed.api.player.PlayerWrapper;
 import me.vowed.api.player.PlayerWrapperManager;
 import me.vowed.api.plugin.Vowed;
+import me.vowed.api.plugin.VowedPlugin;
+import me.vowed.api.race.Race;
 import me.vowed.api.race.races.Gender;
 import me.vowed.api.skins.Skin;
 import me.vowed.api.skins.SkinUtil;
@@ -38,7 +40,12 @@ public class RaceListener implements Listener
 {
     private HashMap<UUID, Boolean> isHandling = new HashMap<>();
     private List<String> raceNames = Arrays.asList("Dwarf", "Elf", "Human");
-
+    VowedPlugin p;
+    SkinUtil skinUtil;
+    public RaceListener(VowedPlugin p, SkinUtil skinUtil){
+        this.p = p;
+        this.skinUtil = skinUtil;
+    }
     @EventHandler
     public void on(PlayerJoinEvent joinEvent) throws SQLException, IOException
     {
@@ -78,6 +85,7 @@ public class RaceListener implements Listener
             String race = resultSet.getString("race");
             String gender = resultSet.getString("gender");
             Race playerRace = Vowed.getRaceManager().getRace(race, Gender.valueOf(gender.toUpperCase()));
+            Vowed.LOG.debug(race + " " + gender + "!");
             playerWrapper.setRace(playerRace);
         }
     }
@@ -111,8 +119,8 @@ public class RaceListener implements Listener
                             {
                                 playerWrapper.setRace(Vowed.getRaceManager().getRace(argList.get(0).toUpperCase(), Gender.valueOf(argList.get(1).toUpperCase())));
                                 Skin skin = skinUtil.getSkinFromUUID(playerWrapper.getRace().getSkin());
-                                SkinUtil.addToEntry(player, skin);
-                                SkinUtil.saveSkins();
+                                skinUtil.addToEntry(player, skin);
+                                skinUtil.saveSkins();
 
                                 if (skin.getResponseCode() != null && skin.getResponseCode() != 429)
                                 {
@@ -138,7 +146,7 @@ public class RaceListener implements Listener
     @EventHandler
     public void on(PlayerQuitEvent quitEvent)
     {
-        SkinUtil.saveSkins();
+        skinUtil.saveSkins();
     }
 
     public boolean containsCaseInsensitive(String s, List<String> l)

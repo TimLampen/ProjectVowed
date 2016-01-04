@@ -1,4 +1,4 @@
-package me.vowed.api.test;
+package me.vowed.api.utils;
 
 /**
  * Created by JPaul on 12/25/2015.

@@ -1,6 +1,7 @@
-package me.vowed.api.test;
+package me.vowed.api.utils;
 
 import me.vowed.api.plugin.Vowed;
+import me.vowed.api.plugin.VowedPlugin;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -17,6 +18,11 @@ import java.util.UUID;
  */
 public class TransactionUtil
 {
+    static VowedPlugin p;
+    public TransactionUtil(VowedPlugin p){
+        this.p = p;
+    }
+
     public static List<String> sendNames(String uuid)
     {
         List<String> names = new ArrayList<>();
@@ -126,7 +132,7 @@ public class TransactionUtil
 
     public static List<List<String>> getTransactions(UUID uuid) throws IOException
     {
-        File file = new File("C:\\ProjectVowed\\plugins\\VowedCore\\Transactions\\" + uuid.toString());
+        File file = new File(p.getDataFolder() + "Transactions\\" + uuid.toString());
 
         List<List<String>> files = new ArrayList<>();
         if (file.listFiles() != null)

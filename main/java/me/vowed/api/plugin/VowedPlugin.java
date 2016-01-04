@@ -23,9 +23,10 @@ import me.vowed.api.money.MoneyManager;
 import me.vowed.api.pets.PetListener;
 import me.vowed.api.player.PlayerWrapperListener;
 import me.vowed.api.race.IRaceManager;
-import me.vowed.api.race.RaceListener;
+import me.vowed.api.race.listeners.EntityShootListener;
+import me.vowed.api.race.listeners.RaceListener;
 import me.vowed.api.race.RaceManager;
-import me.vowed.api.test.ShopData;
+import me.vowed.api.utils.ShopData;
 import me.vowed.api.shops.*;
 import me.vowed.api.skins.SkinHandler;
 import me.vowed.api.skins.SkinUtil;
@@ -36,13 +37,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import javax.naming.NamingEnumeration;
 import javax.swing.*;
 import java.sql.PreparedStatement;
 
@@ -53,7 +52,7 @@ public class VowedPlugin extends JavaPlugin implements IVowedPlugin, Listener
 {
     private static VowedPlugin instance;
     private ProtocolManager protocolManager;
-
+    private SkinUtil skinUtil;
     private static EffectManager effectManager;
     private static DisguiseAPI DISGUISE_MANAGER;
     private static Damage DAMAGE_MANAGER;
@@ -73,28 +72,33 @@ public class VowedPlugin extends JavaPlugin implements IVowedPlugin, Listener
     {
 
         instance = this;
+        skinUtil = new SkinUtil(this);
         Vowed.setPlugin(this);
         Logger.initiate(prefix);
         Logger.log(Log.LogLevel.NORMAL, Vowed.getPrefix(), true);
 
         prepareDatabase();
 
-        getInstance().getServer().getPluginManager().registerEvents(new PlayerWrapperListener(), getInstance());
-        getInstance().getServer().getPluginManager().registerEvents(new Test(), getInstance());
-        getInstance().getServer().getPluginManager().registerEvents(new RaceListener(), getInstance());
-        getInstance().getServer().getPluginManager().registerEvents(new SkinHandler(), getInstance());
-        getInstance().getServer().getPluginManager().registerEvents(new MoneyListener(), getInstance());
-        getInstance().getServer().getPluginManager().registerEvents(new PetListener(), getInstance());
-        getInstance().getServer().getPluginManager().registerEvents(new ShopListener(), getInstance());
-        getInstance().getServer().getPluginManager().registerEvents(new DamagePlayer(), getInstance());
-        getInstance().getServer().getPluginManager().registerEvents(new CompanyListener(), getInstance());
-        getInstance().getServer().getPluginManager().registerEvents(this, getInstance());
 
         DAMAGE_MANAGER = new Damage();
         HEALTH_MANAGER = new HealthManager();
         SHOP_MANAGER = new ShopManager();
         MONEY_MANAGER = new MoneyManager();
         RACE_MANAGER = new RaceManager();
+
+        getInstance().getServer().getPluginManager().registerEvents(new PlayerWrapperListener(), getInstance());
+        getInstance().getServer().getPluginManager().registerEvents(new Test(), getInstance());
+        getInstance().getServer().getPluginManager().registerEvents(new RaceListener(this, skinUtil), getInstance());
+        getInstance().getServer().getPluginManager().registerEvents(new EntityShootListener(this), this);
+        getInstance().getServer().getPluginManager().registerEvents(new SkinHandler(this, skinUtil), getInstance());
+        getInstance().getServer().getPluginManager().registerEvents(new MoneyListener(), getInstance());
+        getInstance().getServer().getPluginManager().registerEvents(new PetListener(), getInstance());
+        getInstance().getServer().getPluginManager().registerEvents(new ShopListener(this), getInstance());
+        getInstance().getServer().getPluginManager().registerEvents(new DamagePlayer(), getInstance());
+        getInstance().getServer().getPluginManager().registerEvents(new CompanyListener(), getInstance());
+        getInstance().getServer().getPluginManager().registerEvents(this, getInstance());
+
+
         DISGUISE_MANAGER = getServer().getServicesManager().getRegistration(DisguiseAPI.class).getProvider();
         COMPANY_MANAGER = new CompanyManager();
         TRANSACTIONS = null;
@@ -106,7 +110,7 @@ public class VowedPlugin extends JavaPlugin implements IVowedPlugin, Listener
         HideEnchantsListener enchantsListener = new HideEnchantsListener(getServer(), getLogger());
         enchantsListener.addListener(protocolManager, getInstance());
 
-        SkinUtil.createFile();
+        skinUtil.createFile();
 
     }
 
@@ -115,7 +119,7 @@ public class VowedPlugin extends JavaPlugin implements IVowedPlugin, Listener
         DATA_POOL.disconnect();
         instance = null;
 
-        SkinUtil.saveSkins();
+        skinUtil.saveSkins();
     }
 
     private void prepareDatabase()

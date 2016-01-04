@@ -4,6 +4,7 @@ import me.vowed.api.money.IMoney;
 import me.vowed.api.player.PlayerWrapper;
 import me.vowed.api.player.PlayerWrapperManager;
 import me.vowed.api.plugin.Vowed;
+import me.vowed.api.plugin.VowedPlugin;
 import me.vowed.api.race.Race;
 import me.vowed.api.race.races.RaceType;
 import org.bukkit.*;
@@ -57,6 +58,10 @@ public class ShopListener implements Listener
     private HashMap<UUID, Boolean> handlingName = new HashMap<>();
     private HashSet<Inventory> inventories = new HashSet<>();
 
+    VowedPlugin p;
+    public ShopListener(VowedPlugin p){
+        this.p = p;
+    }
     @EventHandler
     public void on(PlayerJoinEvent joinEvent) throws IOException
     {
@@ -64,13 +69,13 @@ public class ShopListener implements Listener
 
         isInShop.put(player.getUniqueId(), false);
 
-        File data = new File("C:\\ProjectVowed\\plugins\\VowedCore\\Transactions\\DATA");
+        File data = new File(p.getDataFolder() + File.separator + "Transactions" + File.separator + "DATA");
         if (!data.exists())
         {
             data.mkdir();
         }
 
-        File nameList = new File("C:\\ProjectVowed\\plugins\\VowedCore\\Transactions\\DATA\\names.dataList");
+        File nameList = new File(p.getDataFolder() + File.separator + "Transactions" + File.separator + "DATA" + File.separator + "names.dataList");
         if (!nameList.exists())
         {
             nameList.createNewFile();
@@ -93,24 +98,34 @@ public class ShopListener implements Listener
         fileWriter.close();
     }
 
+
     @EventHandler
-    public void on(PlayerDropItemEvent dropItemEvent)
-    {
-        Player player = dropItemEvent.getPlayer();
+    public void onInteract(PlayerInteractEvent event){
+        Player player = event.getPlayer();
+        if(event.getAction()==Action.RIGHT_CLICK_BLOCK){
+            if(player.isSneaking() && player.getItemInHand()!=null && player.getItemInHand().getType()==Material.BOOK){
+                if(Vowed.getShopManager().getShop(player) == null){
+                    Location loc = event.getClickedBlock().getLocation();
+                    IShop shop = Vowed.getShopManager().createShop(player, loc.add(0, 1, 0), ShopType.GEAR_SHOP);
+                    shop.createShop();
 
-        IShop shop = Vowed.getShopManager().createShop(player, player.getLocation().subtract(0, 1, 0), ShopType.GEAR_SHOP);
-        shop.createShop();
+                    openButton = new UniqueItem(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 5), UUID.randomUUID().toString().toUpperCase().substring(0, 6));
+                    openButtonItem = new ShopItem(openButton);
 
-        openButton = new UniqueItem(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 5), UUID.randomUUID().toString().toUpperCase().substring(0, 6));
-        openButtonItem = new ShopItem(openButton);
+                    closeButton = new UniqueItem(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 14), UUID.randomUUID().toString().toUpperCase().substring(0, 6));
+                    closeButtonItem = new ShopItem(closeButton);
 
-        closeButton = new UniqueItem(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 14), UUID.randomUUID().toString().toUpperCase().substring(0, 6));
-        closeButtonItem = new ShopItem(closeButton);
-
-        shop.setOpen(false);
-        handlingName.put(shop.getOwnerUUID(), true);
-        shop.getOwner().sendMessage(ChatColor.YELLOW.toString() + ChatColor.BOLD + "Please enter your shop's name");
+                    shop.setOpen(false);
+                    handlingName.put(shop.getOwnerUUID(), true);
+                    shop.getOwner().sendMessage(ChatColor.YELLOW.toString() + ChatColor.BOLD + "Please enter your shop's name");
+                }
+                else{
+                    player.sendMessage(ChatColor.RED + "You cannot create a shop while you already have one open!");
+                }
+            }
+        }
     }
+
 
     @EventHandler
     public void on(PlayerInteractEvent interactEvent)
@@ -188,7 +203,11 @@ public class ShopListener implements Listener
             {
                 IShop shop = Vowed.getShopManager().getShop(shopLocation);
 
-                if (inventory.equals(shop.getInventory(playerWrapper)) && !handlingItem)
+                if (inventory
+                        .equals(
+                                shop.getInventory(
+                                        playerWrapper)) &&
+                        !handlingItem)
                 {
                     isInShop.put(player.getUniqueId(), false);
                 }
@@ -470,19 +489,19 @@ public class ShopListener implements Listener
     {
         try
         {
-            File parentFolder = new File("C:\\Users\\JPaul\\Desktop\\Server\\plugins\\VowedCore\\Transactions");
+            File parentFolder = new File(p.getDataFolder() + "Transactions");
             if (!parentFolder.exists())
             {
                 parentFolder.mkdirs();
             }
 
-            File buyerFolder = new File("C:\\Users\\JPaul\\Desktop\\Server\\plugins\\VowedCore\\Transactions\\" + buyer.getPlayer().getUniqueId());
+            File buyerFolder = new File(p.getDataFolder() + "Transactions" + File.separator + buyer.getPlayer().getUniqueId());
             if (!buyerFolder.exists())
             {
                 buyerFolder.mkdir();
             }
 
-            File sellerFolder = new File("C:\\Users\\JPaul\\Desktop\\Server\\plugins\\VowedCore\\Transactions\\" + seller.getPlayer().getUniqueId());
+            File sellerFolder = new File(p.getDataFolder() + "Transactions" + File.separator + seller.getPlayer().getUniqueId());
             if (!sellerFolder.exists())
             {
                 sellerFolder.mkdir();
@@ -491,14 +510,14 @@ public class ShopListener implements Listener
             DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy_hh-mm-ss-a");
             Date date = new Date();
 
-            String buyerPath = "C:\\Users\\JPaul\\Desktop\\Server\\plugins\\VowedCore\\Transactions\\" + buyer.getPlayer().getUniqueId() + "\\" + buyer.getPlayer().getUniqueId().toString() + "_" + dateFormat.format(date) + ".transactionDATA".replaceAll(" ", "");
+            String buyerPath = p.getDataFolder() + "Transactions" + File.separator + buyer.getPlayer().getUniqueId() + File.separator + buyer.getPlayer().getUniqueId().toString() + "_" + dateFormat.format(date) + ".transactionDATA".replaceAll(" ", "");
             File buyerFile = new File(buyerPath);
             if (!buyerFile.exists())
             {
                 buyerFile.createNewFile();
             }
 
-            String sellerPath = "C:\\Users\\JPaul\\Desktop\\Server\\plugins\\VowedCore\\Transactions\\" + seller.getPlayer().getUniqueId() + "\\" + seller.getPlayer().getUniqueId().toString() + "_" + dateFormat.format(date) + ".transactionDATA".replaceAll(" ", "");
+            String sellerPath = p.getDataFolder() + "Transactions" + File.separator + seller.getPlayer().getUniqueId() + File.separator + seller.getPlayer().getUniqueId().toString() + "_" + dateFormat.format(date) + ".transactionDATA".replaceAll(" ", "");
             File sellerFile = new File(sellerPath);
             if (!sellerFile.exists())
             {
