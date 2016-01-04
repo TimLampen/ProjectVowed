@@ -13,7 +13,7 @@ public interface IShopManager
 
     IShop getShop(Player player);
 
-    IShop shopFromLocation(Location location);
+    IShop getShop(Location location);
 
     boolean isOwner(IShop shop, Player player);
 }

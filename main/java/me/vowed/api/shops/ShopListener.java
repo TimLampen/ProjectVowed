@@ -55,6 +55,7 @@ public class ShopListener implements Listener
     private HashMap<UUID, Boolean> isOwner = new HashMap<>();
     private HashMap<UUID, Boolean> isInShop = new HashMap<>();
     private HashMap<UUID, Boolean> handlingName = new HashMap<>();
+    private HashSet<Inventory> inventories = new HashSet<>();
 
     @EventHandler
     public void on(PlayerJoinEvent joinEvent) throws IOException
@@ -129,7 +130,7 @@ public class ShopListener implements Listener
                 {
                     interactEvent.setCancelled(true);
 
-                    IShop shop = Vowed.getShopManager().shopFromLocation(location);
+                    IShop shop = Vowed.getShopManager().getShop(location);
                     shopLocation = shop.getLocation(); //returns shop if the block clicked is shop, according to location
 
                     isOwner.put(player.getUniqueId(), Vowed.getShopManager().isOwner(shop, player));
@@ -138,7 +139,7 @@ public class ShopListener implements Listener
                     {
                         isInShop.put(player.getUniqueId(), true);
                         player.openInventory(shop.getInventory(playerWrapper));
-
+                        inventories.add(shop.getInventory(playerWrapper));
                     } else
                     {
                         if (isOwner.get(player.getUniqueId()))
@@ -147,6 +148,7 @@ public class ShopListener implements Listener
                             {
                                 isInShop.put(player.getUniqueId(), true);
                                 player.openInventory(shop.getInventory(playerWrapper));
+                                inventories.add(shop.getInventory(playerWrapper));
                             } else if (handlingName.get(player.getUniqueId()))
                             {
                                 player.sendMessage(ChatColor.RED.toString() + ChatColor.BOLD + "Please type in a valid 16 character name, or enter ' cancel '");
@@ -167,7 +169,7 @@ public class ShopListener implements Listener
             if(ShopUtils.isShop(interactEvent.getClickedBlock())){
                 interactEvent.setCancelled(true);
 
-                IShop shop = Vowed.getShopManager().shopFromLocation(interactEvent.getClickedBlock().getLocation());
+                IShop shop = Vowed.getShopManager().getShop(interactEvent.getClickedBlock().getLocation());
                 shop.destroyShop(player);
             }
         }
@@ -184,7 +186,7 @@ public class ShopListener implements Listener
         {
             if (isInShop.get(player.getUniqueId()))
             {
-                IShop shop = Vowed.getShopManager().shopFromLocation(shopLocation);
+                IShop shop = Vowed.getShopManager().getShop(shopLocation);
 
                 if (inventory.equals(shop.getInventory(playerWrapper)) && !handlingItem)
                 {
@@ -210,7 +212,7 @@ public class ShopListener implements Listener
         {
             if (isInShop.get(player.getUniqueId()))
             {
-                IShop shop = Vowed.getShopManager().shopFromLocation(shopLocation);
+                IShop shop = Vowed.getShopManager().getShop(shopLocation);
                 PlayerWrapper ownerWrapper = PlayerWrapperManager.getPlayerWrapper(shop.getOwner());
 
                 if (inventory != null)
@@ -241,7 +243,10 @@ public class ShopListener implements Listener
                                         ShopItemManager.addShopItems(shop, closeButtonItem);
                                         uniqueItems.put(closeButtonItem.getShopItem(), closeButton);
 
-                                        closeInventories(inventory);
+                                        for (Inventory inventoryFinder : inventories)
+                                        {
+                                            closeInventories(inventoryFinder);
+                                        }
                                     }
                                 }
                             } else
@@ -342,7 +347,7 @@ public class ShopListener implements Listener
             {
                 chatEvent.setCancelled(true);
 
-                IShop shop = Vowed.getShopManager().shopFromLocation(shopLocation);
+                IShop shop = Vowed.getShopManager().getShop(shopLocation);
 
                 if (isShift && handlingItem && isOwner.get(player.getUniqueId()) && !shop.isOpen())
                 { //applying price
@@ -452,15 +457,12 @@ public class ShopListener implements Listener
 
     public void closeInventories(Inventory inventory)
     {
-        List<UUID> list = new ArrayList<>();
-        for (HumanEntity viewer : inventory.getViewers())
+        Iterator<HumanEntity> iterator = inventory.getViewers().iterator();
+        while (iterator.hasNext())
         {
-            list.add(viewer.getUniqueId());
-        }
-        for (UUID viewer : list)
-        {
-            Player player = Bukkit.getPlayer(viewer);
-            player.closeInventory();
+            HumanEntity humanEntity = iterator.next();
+            iterator.remove();
+            humanEntity.closeInventory();
         }
     }
 

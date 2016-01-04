@@ -280,20 +280,15 @@ public class Shop implements IShop
     {
         this.armourStand = (ArmorStand) this.location.getWorld().spawnEntity(armourStandLocation, EntityType.ARMOR_STAND);
 
+        EntityArmorStand nmsarmourstand = ((CraftArmorStand) armourStand).getHandle();
+
+        armourStand.setMarker(true);
+        armourStand.setGravity(false);
         armourStand.setVisible(false);
         armourStand.setCustomName(ChatColor.RED + getName());
         armourStand.setCustomNameVisible(true);
         armourStand.setSmall(true);
         armourStand.setBasePlate(false);
-
-        EntityArmorStand nmsarmourstand = ((CraftArmorStand) armourStand).getHandle();
-
-        NBTTagCompound nbtTagCompound = new NBTTagCompound();
-        nmsarmourstand.c(nbtTagCompound);
-        nbtTagCompound.setBoolean("Marker", true); //destroys stand if set after "setgravity"
-        nmsarmourstand.f(nbtTagCompound);
-
-        armourStand.setGravity(false);
     }
 
     @Override
@@ -329,10 +324,10 @@ public class Shop implements IShop
 
         if (block.getZ() < 0)
         {
-            this.armourStandLocation = new Location(this.location.getWorld(), block.getX(), block.getY(), block.getZ() + 0.5);
+            this.armourStandLocation = new Location(this.location.getWorld(), block.getX(), block.getY() + 0.7, block.getZ() + 0.5);
         } else if (block.getZ() >= 0)
         {
-            this.armourStandLocation = new Location(this.location.getWorld(), block.getX(), block.getY(), block.getZ() + 0.5);
+            this.armourStandLocation = new Location(this.location.getWorld(), block.getX(), block.getY() + 0.7, block.getZ() + 0.5);
         }
 
         showName();
@@ -354,8 +349,8 @@ public class Shop implements IShop
                     manager.locations.remove(block2);
                     manager.shop.remove(getOwnerUUID());
                     Vowed.LOG.debug(manager.shop.toString());
-                    block1.getWorld().getBlockAt(block1).setType(Material.AIR);
-                    block2.getWorld().getBlockAt(block2).setType(Material.AIR);
+                    block1.getBlock().setType(Material.AIR);
+                    block2.getBlock().setType(Material.AIR);
                     armourStand.remove();
 
                     for(ShopItem item : contents) {

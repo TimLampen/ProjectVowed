@@ -49,20 +49,23 @@ public class ShopManager implements IShopManager
                 return iShop;
             }
         }
+
         return null;
     }
 
     @Override
-    public IShop shopFromLocation(Location location)
+    public IShop getShop(Location location)
     {
         int x = location.getBlockX();
         int y = location.getBlockY();
         int z = location.getBlockZ();
-        Location location1 = new Location(location.getWorld(), x, y, z);
-        if (locations.containsKey(location1))
+        Location shopLocation = new Location(location.getWorld(), x, y, z);
+
+        if (locations.containsKey(shopLocation))
         {
-            return locations.get(location1);
+            return locations.get(shopLocation);
         }
+
         return null;
     }
 

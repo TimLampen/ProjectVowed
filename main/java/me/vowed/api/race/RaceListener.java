@@ -78,7 +78,6 @@ public class RaceListener implements Listener
             String race = resultSet.getString("race");
             String gender = resultSet.getString("gender");
             Race playerRace = Vowed.getRaceManager().getRace(race, Gender.valueOf(gender.toUpperCase()));
-            Vowed.LOG.debug(race + " " + gender + "!");
             playerWrapper.setRace(playerRace);
         }
     }

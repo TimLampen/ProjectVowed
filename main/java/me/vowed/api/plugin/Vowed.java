@@ -2,6 +2,7 @@ package me.vowed.api.plugin;
 
 import com.comphenix.protocol.ProtocolManager;
 import de.robingrether.idisguise.api.DisguiseAPI;
+import me.vowed.api.companies.CompanyManager;
 import me.vowed.api.damage.IDamage;
 import me.vowed.api.database.Database;
 import me.vowed.api.health.IHealthManager;
@@ -64,6 +65,11 @@ public class Vowed
     public static IShopManager getShopManager()
     {
         return PLUGIN.getShopManager();
+    }
+
+    public static CompanyManager getCompanyManager()
+    {
+        return PLUGIN.getCompanyManager();
     }
 
     public static ShopData getTransactionTable()

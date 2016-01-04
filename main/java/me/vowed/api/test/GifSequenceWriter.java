@@ -1,8 +1,5 @@
 package me.vowed.api.test;
 
-import com.gif4j.GifEncoder;
-import com.gif4j.GifFrame;
-import com.gif4j.GifImage;
 import org.bukkit.Bukkit;
 import org.bukkit.map.MapCanvas;
 import org.bukkit.map.MapView;

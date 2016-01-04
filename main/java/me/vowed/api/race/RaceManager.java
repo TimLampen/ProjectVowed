@@ -53,7 +53,7 @@ public class RaceManager implements IRaceManager
             try
             {
                 PreparedStatement setRace = Vowed.getDatabase().prepareStatement("INSERT INTO player_info (UUID, race, gender) " +
-                    "VALUES ('" + player.getUniqueId().toString() + "', '" + race.getName().toLowerCase() + "', '" + race.getGender().toString().toUpperCase() + "') " +
+                    "VALUES ('" + player.getUniqueId().toString() + "', '" + race.getName().toUpperCase() + "', '" + race.getGender() + "') " +
                     "ON DUPLICATE KEY UPDATE race = '" + race.getName() + "', gender = '" + race.getGender() + "'");
                 Vowed.LOG.debug(setRace.toString());
                 setRace.executeUpdate();

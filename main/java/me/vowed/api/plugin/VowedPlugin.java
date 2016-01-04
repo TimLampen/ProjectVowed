@@ -6,6 +6,9 @@ import com.zaxxer.hikari.HikariConfig;
 import de.robingrether.idisguise.api.DisguiseAPI;
 import de.slikey.effectlib.EffectLib;
 import de.slikey.effectlib.EffectManager;
+import me.vowed.api.companies.CompanyListener;
+import me.vowed.api.companies.CompanyManager;
+import me.vowed.api.companies.commands.CommandManager;
 import me.vowed.api.damage.Damage;
 import me.vowed.api.damage.DamagePlayer;
 import me.vowed.api.damage.IDamage;
@@ -33,11 +36,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import javax.naming.NamingEnumeration;
 import javax.swing.*;
 import java.sql.PreparedStatement;
 
@@ -56,6 +61,7 @@ public class VowedPlugin extends JavaPlugin implements IVowedPlugin, Listener
     private static IMoneyManager MONEY_MANAGER;
     private static IShopManager SHOP_MANAGER;
     private static IRaceManager RACE_MANAGER;
+    private static CompanyManager COMPANY_MANAGER;
     private static ShopData TRANSACTIONS;
     private JFrame frame;
 
@@ -81,6 +87,7 @@ public class VowedPlugin extends JavaPlugin implements IVowedPlugin, Listener
         getInstance().getServer().getPluginManager().registerEvents(new PetListener(), getInstance());
         getInstance().getServer().getPluginManager().registerEvents(new ShopListener(), getInstance());
         getInstance().getServer().getPluginManager().registerEvents(new DamagePlayer(), getInstance());
+        getInstance().getServer().getPluginManager().registerEvents(new CompanyListener(), getInstance());
         getInstance().getServer().getPluginManager().registerEvents(this, getInstance());
 
         DAMAGE_MANAGER = new Damage();
@@ -89,7 +96,10 @@ public class VowedPlugin extends JavaPlugin implements IVowedPlugin, Listener
         MONEY_MANAGER = new MoneyManager();
         RACE_MANAGER = new RaceManager();
         DISGUISE_MANAGER = getServer().getServicesManager().getRegistration(DisguiseAPI.class).getProvider();
+        COMPANY_MANAGER = new CompanyManager();
         TRANSACTIONS = null;
+
+        getCommand("vowed").setExecutor(new CommandManager());
 
         protocolManager = ProtocolLibrary.getProtocolManager();
         EffectLib effectLib = EffectLib.instance();
@@ -191,6 +201,12 @@ public class VowedPlugin extends JavaPlugin implements IVowedPlugin, Listener
     public IRaceManager getRaceManager()
     {
         return RACE_MANAGER;
+    }
+
+    @Override
+    public CompanyManager getCompanyManager()
+    {
+        return COMPANY_MANAGER;
     }
 
     @Override

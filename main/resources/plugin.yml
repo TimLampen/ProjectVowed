@@ -2,4 +2,8 @@ name: Vowed
 version: 1.0-SNAPSHOT
 description: 666
 main: me.vowed.api.plugin.VowedPlugin
-depend: [EffectLib, ProtocolLib]
+depend: [EffectLib, ProtocolLib, Citizens, Builder, HolographicDisplays]
+
+commands:
+  vowed:
+    description: Vowed
