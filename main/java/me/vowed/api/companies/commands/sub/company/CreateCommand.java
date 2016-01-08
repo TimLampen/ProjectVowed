@@ -87,7 +87,6 @@ public class CreateCommand extends SubCommand
                     case FOOD:
                         BukkitUtil.sendCommand("builder load Food");
                 }
-
                 BukkitUtil.sendCommand("builder origin " + centerXZ[0] + "," + cuboidRegion.getMinimumPoint().getBlockY() + "," + centerXZ[1]);
                 BukkitUtil.sendCommand("builder build excavate");
             }
