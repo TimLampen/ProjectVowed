@@ -68,9 +68,6 @@ public class CommandManager implements CommandExecutor
             {
                 if (sub.getName().equalsIgnoreCase(args[1]))
                 {
-                    Vowed.LOG.debug(args.length);
-                    Vowed.LOG.warning(sub.getMinimumArguments());
-
                     int argsLength = args.length - 2;
 
                     if (argsLength >= sub.getMinimumArguments())

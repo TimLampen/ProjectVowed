@@ -11,6 +11,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 import javax.swing.text.PlainDocument;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -107,10 +108,6 @@ public class Company
 
     public void removeCompany()
     {
-        Vowed.getCompanyManager().companyLocation.remove(getLocation().toString());
-        Vowed.getCompanyManager().companies.remove(this);
-        Vowed.getCompanyManager().companyOwner.remove(getOwner().getUniqueId());
-
         Location loc1 = new Location(getLocation().getWorld(), getRegion().getMaximumPoint().getBlockX(), getRegion().getMaximumPoint().getBlockY(), getRegion().getMaximumPoint().getBlockZ());
         Location loc2 = new Location(getLocation().getWorld(), getRegion().getMinimumPoint().getBlockX(), getRegion().getMinimumPoint().getBlockY(), getRegion().getMinimumPoint().getBlockZ());
         int minX = Math.min(loc1.getBlockX(), loc2.getBlockX());
@@ -130,9 +127,39 @@ public class Company
         }
         WorldGuardUtil.getWorldGuard().getRegionManager(getLocation().getWorld()).removeRegion(getRegion().getId());
 
-        for (Hologram hologram : getHolograms())
+        if (getHolograms() != null)
         {
-            hologram.delete();
+            for (Hologram hologram : getHolograms())
+            {
+                hologram.delete();
+            }
+        }
+
+        Vowed.LOG.severe(Vowed.getCompanyManager().companyOwner.get(getOwner().getUniqueId()).size());
+
+        Vowed.getCompanyManager().companyLocation.remove(getLocation().toString());
+        Vowed.getCompanyManager().companies.remove(this);
+
+        if (Vowed.getCompanyManager().companyOwner.get(getOwner().getUniqueId()).size() >= 2)
+        {
+            Iterator<Company> companyIterator = Vowed.getCompanyManager().companyOwner.get(getOwner().getUniqueId()).iterator();
+            while (companyIterator.hasNext())
+            {
+                Company company = companyIterator.next();
+
+
+                if (company.getName().equals(getName()))
+                {
+                    companyIterator.remove();
+                    Vowed.LOG.warning(Vowed.getCompanyManager().companyOwner.toString());
+                    Vowed.getCompanyManager().companyOwner.get(getOwner().getUniqueId()).remove(company);
+                    Vowed.LOG.severe(Vowed.getCompanyManager().companyOwner.toString());
+                }
+            }
+        }
+        else
+        {
+            Vowed.getCompanyManager().companyOwner.remove(getOwner().getUniqueId());
         }
     }
 }
