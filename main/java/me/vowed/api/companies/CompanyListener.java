@@ -10,16 +10,20 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Door;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.*;
+import org.bukkit.util.Vector;
 
 import java.util.*;
 
@@ -33,153 +37,127 @@ public class CompanyListener implements Listener
     private HashMap<Company, Hologram> column2 = new HashMap<>();
     private HashMap<Company, Hologram> column3 = new HashMap<>();
     private HashMap<Company, Hologram> bottomRow = new HashMap<>();
+
     HashMap<UUID, Map<Location, Material>> greenBlocks = new HashMap<>();
     HashMap<UUID, Map<Location, Byte>> greenData = new HashMap<>();
     HashMap<UUID, Map<Location, Material>> redBlocks = new HashMap<>();
     HashMap<UUID, Map<Location, Byte>> redData = new HashMap<>();
-    List<UUID> handling = new ArrayList<>();
-    HashMap<UUID, Location> center = new HashMap<>();
-    HashMap<UUID, Boolean> handle = new HashMap<>();
+    HashMap<UUID, Location> greenCenter = new HashMap<>();
+    HashMap<UUID, Location> redCenter = new HashMap<>();
+    HashMap<UUID, Boolean> handleGreen = new HashMap<>();
+    HashMap<UUID, Boolean> handleRed = new HashMap<>();
+
 
     @EventHandler
     public void on(PlayerMoveEvent moveEvent)
     {
 
         Player player = moveEvent.getPlayer();
-    }
 
-    @EventHandler
-    public void on(PlayerInteractEvent interactEvent)
-    {
-        Player player = interactEvent.getPlayer();
-        Block clickedBlock = interactEvent.getClickedBlock();
-        ProtectedRegion region = WorldGuardUtil.getRegion(player.getLocation());
-
-        if (interactEvent.getAction() == Action.LEFT_CLICK_BLOCK && player.getItemInHand().getItemMeta().getLore() != null && player.getItemInHand().getItemMeta().getLore().contains("Selector"))
+        if (player.getItemInHand() != null && player.getItemInHand().getType() != Material.AIR && player.getItemInHand().getItemMeta().getLore() != null && player.getItemInHand().getItemMeta().getLore().contains("Selector"))
         {
-            if (player.getItemInHand() != null && player.getItemInHand().getType() != Material.AIR && player.getItemInHand().getItemMeta().getLore() != null && player.getItemInHand().getItemMeta().getLore().contains("Selector"))
+            Location location = player.getTargetBlock((HashSet<Byte>) null, 5).getLocation();
+
+            if (isFlat(location, 5))
             {
-                new BukkitRunnable()
+                //removing redblocks if there are any because isFlat is true
+                if (redBlocks.get(player.getUniqueId()) != null && redData.get(player.getUniqueId()) != null && redBlocks.get(player.getUniqueId()).keySet().size() >= 1 && redData.get(player.getUniqueId()).keySet().size() >= 1)
                 {
-                    int counter = 0;
-                    @Override
-                    public void run()
+                    Iterator<Map.Entry<Location, Material>> blockIterator = redBlocks.get(player.getUniqueId()).entrySet().iterator();
+                    Iterator<Location> dataIterator = redData.get(player.getUniqueId()).keySet().iterator();
+
+                    while (blockIterator.hasNext())
                     {
-                        if (player.getItemInHand() != null && player.getItemInHand().getType() != Material.AIR && player.getItemInHand().getItemMeta().getLore() != null && player.getItemInHand().getItemMeta().getLore().contains("Selector"))
+                        Map.Entry<Location, Material> blockMap = blockIterator.next();
+                        Location blockLocation = blockMap.getKey();
+                        Location dataLocation = dataIterator.next();
+                        Block replaceBlock = blockLocation.getBlock();
+
+                        replaceBlock.setType(redBlocks.get(player.getUniqueId()).get(blockLocation));
+                        replaceBlock.setData(redData.get(player.getUniqueId()).get(dataLocation));
+
+                        blockIterator.remove();
+                        dataIterator.remove();
+                    }
+                }
+
+                //adding the greenblocks to the map
+
+                if (greenBlocks.get(player.getUniqueId()) != null && greenData.get(player.getUniqueId()) != null)
+                {
+                    if (greenBlocks.get(player.getUniqueId()).isEmpty())
+                    {
+                        if ((!greenBlocks.get(player.getUniqueId()).containsKey(location) && !greenData.get(player.getUniqueId()).containsKey(location)))
                         {
-                            handling.add(player.getUniqueId());
-                            Location location = player.getTargetBlock((HashSet<Byte>) null, 5).getLocation();
-
-                            if (isFlat(location, 6))
+                            for (Location locations : getSquare(player, location, 5, Material.WOOL, (byte) 5))
                             {
-                                //removing redblocks if there are any because isFlat is true
-                                if (redBlocks.get(player.getUniqueId()) != null && redData.get(player.getUniqueId()) != null && redBlocks.get(player.getUniqueId()).keySet().size() >= 1 && redData.get(player.getUniqueId()).keySet().size() >= 1)
-                                {
-                                    Iterator<Map.Entry<Location, Material>> blockIterator = redBlocks.get(player.getUniqueId()).entrySet().iterator();
-                                    Iterator<Location> dataIterator = redData.get(player.getUniqueId()).keySet().iterator();
+                                greenBlocks.get(player.getUniqueId()).put(locations, locations.getBlock().getType());
 
-                                    while (blockIterator.hasNext())
-                                    {
-                                        Map.Entry<Location, Material> blockMap = blockIterator.next();
-                                        Location blockLocation = blockMap.getKey();
-                                        Location dataLocation = dataIterator.next();
-                                        Block replaceBlock = blockLocation.getBlock();
+                                greenData.get(player.getUniqueId()).put(locations, locations.getBlock().getData());
+                            }
+                        }
+                    }
+                } else
+                {
+                    Map<Location, Material> blockMaterial = new HashMap<>();
+                    Map<Location, Byte> blockData = new HashMap<>();
+                    for (Location locations : getSquare(player, location, 5, Material.WOOL, (byte) 5))
+                    {
+                        if (locations.getBlock().getType() != Material.WOOL)
+                        {
+                            blockMaterial.put(locations, locations.getBlock().getType());
+                            greenBlocks.put(player.getUniqueId(), blockMaterial);
 
-                                        replaceBlock.setType(redBlocks.get(player.getUniqueId()).get(blockLocation));
-                                        replaceBlock.setData(redData.get(player.getUniqueId()).get(dataLocation));
+                            blockData.put(locations, locations.getBlock().getData());
+                            greenData.put(player.getUniqueId(), blockData);
+                        }
+                    }
+                }
 
-                                        blockIterator.remove();
-                                        dataIterator.remove();
-                                    }
-                                }
+                //setting the targetblock green wool to indicate isFlat = true
 
-                                //adding the greenblocks to the map
-
-                                if (greenBlocks.get(player.getUniqueId()) != null && greenData.get(player.getUniqueId()) != null)
-                                {
-                                    if (greenBlocks.get(player.getUniqueId()).isEmpty())
-                                    {
-                                        if ((!greenBlocks.get(player.getUniqueId()).containsKey(location) && !greenData.get(player.getUniqueId()).containsKey(location)))
-                                        {
-                                            for (Location locations : getSquare(player, location, 6))
-                                            {
-                                                greenBlocks.get(player.getUniqueId()).put(locations, location.getBlock().getType());
-
-                                                greenData.get(player.getUniqueId()).put(locations, location.getBlock().getData());
-                                            }
-                                        }
-                                    }
-                                } else
-                                {
-                                    Map<Location, Material> blockMaterial = new HashMap<>();
-                                    Map<Location, Byte> blockData = new HashMap<>();
-                                    for (Location locations : getSquare(player, location, 6))
-                                    {
-                                        if (locations.getBlock().getType() != Material.WOOL)
-                                        {
-                                            blockMaterial.put(locations, locations.getBlock().getType());
-                                            greenBlocks.put(player.getUniqueId(), blockMaterial);
-
-                                            blockData.put(locations, locations.getBlock().getData());
-                                            greenData.put(player.getUniqueId(), blockData);
-                                        }
-                                    }
-                                }
+                if (handleGreen.get(player.getUniqueId()) != null)
+                {
+                    if (handleGreen.get(player.getUniqueId()))
+                    {
+                        createSquare(location, 5, Material.WOOL, (byte) 5);
+                    }
+                }
 
 
-                                //setting the targetblock green wool to indicate isFlat = true
+                //returning the block to its previous state if the map size > 1, meaning, dont remove the block the person is looking at (target block)
 
-                                if (handle.get(player.getUniqueId()) != null)
-                                {
-                                    if (handle.get(player.getUniqueId()))
-                                    {
-                                            createSquare(location, 5, Material.WOOL, (byte) 5);
-                                            Vowed.LOG.warning("CALLED");
-                                    }
-                                    else
-                                    {
-                                        Vowed.LOG.info("FALSE");
-                                    }
-                                }
+                if (greenBlocks.get(player.getUniqueId()) != null && greenData.get(player.getUniqueId()) != null && greenCenter.get(player.getUniqueId()) != null && !greenCenter.get(player.getUniqueId()).toString().equalsIgnoreCase(location.toString()))
+                {
+                    Iterator<Map.Entry<Location, Material>> blockIterator = greenBlocks.get(player.getUniqueId()).entrySet().iterator();
+                    Iterator<Location> dataIterator = greenData.get(player.getUniqueId()).keySet().iterator();
 
+                    while (blockIterator.hasNext())
+                    {
+                        Map.Entry<Location, Material> blockMap = blockIterator.next();
+                        Location blockLocation = blockMap.getKey();
 
+                        Location dataLocation = dataIterator.next();
+                        Block replaceBlock = blockLocation.getBlock();
 
-                                //returning the block to its previous state if the map size > 1, meaning, dont remove the block the person is looking at (target block)
+                        replaceBlock.setType(blockMap.getValue());
+                        replaceBlock.setData(greenData.get(player.getUniqueId()).get(dataLocation));
 
-                                if (greenBlocks.get(player.getUniqueId()) != null && greenData.get(player.getUniqueId()) != null && !center.get(player.getUniqueId()).toString().equalsIgnoreCase(location.toString()))
-                                {
-                                    Iterator<Map.Entry<Location, Material>> blockIterator = greenBlocks.get(player.getUniqueId()).entrySet().iterator();
-                                    Iterator<Location> dataIterator = greenData.get(player.getUniqueId()).keySet().iterator();
+                        blockIterator.remove();
+                        dataIterator.remove();
 
-                                    handle.put(player.getUniqueId(), true);
+                        greenCenter.clear();
+                    }
 
-                                    while (blockIterator.hasNext())
-                                    {
-                                        Map.Entry<Location, Material> blockMap = blockIterator.next();
-                                        Location blockLocation = blockMap.getKey();
+                }
 
-                                        Location dataLocation = dataIterator.next();
-                                        Block replaceBlock = blockLocation.getBlock();
-
-                                        replaceBlock.setType(greenBlocks.get(player.getUniqueId()).get(blockLocation));
-                                        replaceBlock.setData(greenData.get(player.getUniqueId()).get(dataLocation));
-
-                                        blockIterator.remove();
-                                        dataIterator.remove();
-
-                                        center.clear();
-
-                                    }
-                                    if (!blockIterator.hasNext())
-                                    {
-                                        handle.put(player.getUniqueId(), true);
-                                        Vowed.LOG.severe("CALLED");
-                                    }
-                                    else
-                                    {
-                                        handle.put(player.getUniqueId(), false);
-                                    }
-                                }
+                if (greenBlocks.get(player.getUniqueId()) != null && greenData.get(player.getUniqueId()) != null && greenBlocks.get(player.getUniqueId()).isEmpty() && greenData.get(player.getUniqueId()).isEmpty())
+                {
+                    handleGreen.put(player.getUniqueId(), true);
+                } else
+                {
+                    handleGreen.put(player.getUniqueId(), false);
+                }
 
                                 /*
                                 *
@@ -192,123 +170,150 @@ public class CompanyListener implements Listener
                                 * q
                                 * DONT BOTHER WITH THIS SHIT TIM BROKE IT*/
 
-                            } else
-                            {
-                                if (greenBlocks.get(player.getUniqueId()) != null && greenData.get(player.getUniqueId()) != null && greenBlocks.get(player.getUniqueId()).keySet().size() >= 1 && greenData.get(player.getUniqueId()).keySet().size() >= 1)
-                                {
-                                    Iterator<Map.Entry<Location, Material>> blockIterator = greenBlocks.get(player.getUniqueId()).entrySet().iterator();
-                                    Iterator<Location> dataIterator = greenData.get(player.getUniqueId()).keySet().iterator();
+            } else
+            {
+                if (greenBlocks.get(player.getUniqueId()) != null && greenData.get(player.getUniqueId()) != null && greenBlocks.get(player.getUniqueId()).keySet().size() >= 1 && greenData.get(player.getUniqueId()).keySet().size() >= 1)
+                {
+                    Iterator<Map.Entry<Location, Material>> blockIterator = greenBlocks.get(player.getUniqueId()).entrySet().iterator();
+                    Iterator<Location> dataIterator = greenData.get(player.getUniqueId()).keySet().iterator();
 
-                                    while (blockIterator.hasNext())
-                                    {
-                                        Map.Entry<Location, Material> blockMap = blockIterator.next();
-                                        Location blockLocation = blockMap.getKey();
-                                        Location dataLocation = dataIterator.next();
-                                        Block replaceBlock = blockLocation.getBlock();
+                    while (blockIterator.hasNext())
+                    {
+                        Map.Entry<Location, Material> blockMap = blockIterator.next();
+                        Location blockLocation = blockMap.getKey();
+                        Location dataLocation = dataIterator.next();
+                        Block replaceBlock = blockLocation.getBlock();
 
-                                        replaceBlock.setType(greenBlocks.get(player.getUniqueId()).get(blockLocation));
-                                        replaceBlock.setData(greenData.get(player.getUniqueId()).get(dataLocation));
+                        replaceBlock.setType(greenBlocks.get(player.getUniqueId()).get(blockLocation));
+                        replaceBlock.setData(greenData.get(player.getUniqueId()).get(dataLocation));
 
-                                        blockIterator.remove();
-                                        dataIterator.remove();
-                                    }
-                                }
+                        blockIterator.remove();
+                        dataIterator.remove();
+                    }
+                }
 
-                                if (redBlocks.get(player.getUniqueId()) != null && redData.get(player.getUniqueId()) != null)
-                                {
-                                    if ((!redBlocks.get(player.getUniqueId()).containsKey(location) && !redData.get(player.getUniqueId()).containsKey(location)))
-                                    {
-                                        redBlocks.get(player.getUniqueId()).put(location, location.getBlock().getType());
-
-                                        redData.get(player.getUniqueId()).put(location, location.getBlock().getData());
-                                    }
-                                } else
-                                {
-                                    Map<Location, Material> block = new HashMap<>();
-                                    block.put(location, location.getBlock().getType());
-                                    redBlocks.put(player.getUniqueId(), block);
-
-                                    Map<Location, Byte> data = new HashMap<>();
-                                    data.put(location, location.getBlock().getData());
-                                    redData.put(player.getUniqueId(), data);
-                                }
-
-                                location.getBlock().setTypeIdAndData(Material.WOOL.getId(), (byte) 14, true);
-
-
-                                if (redBlocks.get(player.getUniqueId()) != null && redData.get(player.getUniqueId()) != null && redBlocks.get(player.getUniqueId()).keySet().size() > 1)
-                                {
-                                    Iterator<Map.Entry<Location, Material>> blockIterator = redBlocks.get(player.getUniqueId()).entrySet().iterator();
-                                    Iterator<Location> dataIterator = redData.get(player.getUniqueId()).keySet().iterator();
-
-                                    while (blockIterator.hasNext())
-                                    {
-                                        Map.Entry<Location, Material> blockMap = blockIterator.next();
-                                        Location blockLocation = blockMap.getKey();
-                                        Location dataLocation = dataIterator.next();
-                                        Block replaceBlock = blockLocation.getBlock();
-
-                                        replaceBlock.setType(redBlocks.get(player.getUniqueId()).get(blockLocation));
-                                        replaceBlock.setData(redData.get(player.getUniqueId()).get(dataLocation));
-
-                                        blockIterator.remove();
-                                        dataIterator.remove();
-                                    }
-                                }
-                            }
-                        } else
+                if (redBlocks.get(player.getUniqueId()) != null && redData.get(player.getUniqueId()) != null)
+                {
+                    if (redBlocks.get(player.getUniqueId()).isEmpty())
+                    {
+                        if ((!redBlocks.get(player.getUniqueId()).containsKey(location) && !redData.get(player.getUniqueId()).containsKey(location)))
                         {
-                            handling.remove(player.getUniqueId());
-
-                            if (!handling.contains(player.getUniqueId()))
+                            for (Location locations : getSquare(player, location, 5, Material.WOOL, (byte) 14))
                             {
-                                if (greenBlocks.get(player.getUniqueId()) != null && greenData.get(player.getUniqueId()) != null && greenBlocks.get(player.getUniqueId()).keySet().size() > 0 && greenData.get(player.getUniqueId()).keySet().size() > 0)
-                                {
-                                    Iterator<Map.Entry<Location, Material>> blockIterator = greenBlocks.get(player.getUniqueId()).entrySet().iterator();
-                                    Iterator<Location> dataIterator = greenData.get(player.getUniqueId()).keySet().iterator();
+                                redBlocks.get(player.getUniqueId()).put(locations, locations.getBlock().getType());
 
-                                    while (blockIterator.hasNext())
-                                    {
-                                        Map.Entry<Location, Material> blockMap = blockIterator.next();
-                                        Location blockLocation = blockMap.getKey();
-                                        Location dataLocation = dataIterator.next();
-                                        Block replaceBlock = blockLocation.getBlock();
-
-                                        replaceBlock.setType(greenBlocks.get(player.getUniqueId()).get(blockLocation));
-                                        replaceBlock.setData(greenData.get(player.getUniqueId()).get(dataLocation));
-
-                                        blockIterator.remove();
-                                        dataIterator.remove();
-                                    }
-                                }
-                                if (redBlocks.get(player.getUniqueId()) != null && redData.get(player.getUniqueId()) != null && redBlocks.get(player.getUniqueId()).keySet().size() > 0 && redData.get(player.getUniqueId()).keySet().size() > 0)
-                                {
-                                    Iterator<Map.Entry<Location, Material>> blockIterator = redBlocks.get(player.getUniqueId()).entrySet().iterator();
-                                    Iterator<Location> dataIterator = redData.get(player.getUniqueId()).keySet().iterator();
-
-                                    while (blockIterator.hasNext())
-                                    {
-                                        Map.Entry<Location, Material> blockMap = blockIterator.next();
-                                        Location blockLocation = blockMap.getKey();
-                                        Location dataLocation = dataIterator.next();
-                                        Block replaceBlock = blockLocation.getBlock();
-
-                                        replaceBlock.setType(redBlocks.get(player.getUniqueId()).get(blockLocation));
-                                        replaceBlock.setData(redData.get(player.getUniqueId()).get(dataLocation));
-
-                                        blockIterator.remove();
-                                        dataIterator.remove();
-                                    }
-                                }
+                                redData.get(player.getUniqueId()).put(locations, locations.getBlock().getData());
                             }
-
-                            cancel();
                         }
                     }
+                } else
+                {
+                    Map<Location, Material> blockMaterial = new HashMap<>();
+                    Map<Location, Byte> blockData = new HashMap<>();
+                    for (Location locations : getSquare(player, location, 5, Material.WOOL, (byte) 14))
+                    {
+                        if (locations.getBlock().getType() != Material.WOOL)
+                        {
+                            blockMaterial.put(locations, locations.getBlock().getType());
+                            redBlocks.put(player.getUniqueId(), blockMaterial);
 
-                }.runTaskTimer(Vowed.getPlugin(), 1, 0);
+                            blockData.put(locations, locations.getBlock().getData());
+                            redData.put(player.getUniqueId(), blockData);
+                        }
+                    }
+                }
+
+
+                if (handleRed.get(player.getUniqueId()) != null)
+                {
+                    if (handleRed.get(player.getUniqueId()))
+                    {
+                        createSquare(location, 5, Material.WOOL, (byte) 14);
+                    }
+                }
+
+
+                if (redBlocks.get(player.getUniqueId()) != null && redData.get(player.getUniqueId()) != null && redCenter.get(player.getUniqueId()) != null && !redCenter.get(player.getUniqueId()).toString().equalsIgnoreCase(location.toString()))
+                {
+                    Iterator<Map.Entry<Location, Material>> blockIterator = redBlocks.get(player.getUniqueId()).entrySet().iterator();
+                    Iterator<Location> dataIterator = redData.get(player.getUniqueId()).keySet().iterator();
+
+                    while (blockIterator.hasNext())
+                    {
+                        Map.Entry<Location, Material> blockMap = blockIterator.next();
+                        Location blockLocation = blockMap.getKey();
+                        Location dataLocation = dataIterator.next();
+                        Block replaceBlock = blockLocation.getBlock();
+
+                        replaceBlock.setType(redBlocks.get(player.getUniqueId()).get(blockLocation));
+                        replaceBlock.setData(redData.get(player.getUniqueId()).get(dataLocation));
+
+                        blockIterator.remove();
+                        dataIterator.remove();
+
+                        redCenter.clear();
+                    }
+
+                }
+
+                if (redBlocks.get(player.getUniqueId()) != null && redData.get(player.getUniqueId()) != null && redBlocks.get(player.getUniqueId()).isEmpty() && redData.get(player.getUniqueId()).isEmpty())
+                {
+                    handleRed.put(player.getUniqueId(), true);
+                } else
+                {
+                    handleRed.put(player.getUniqueId(), false);
+                }
+            }
+        } else
+        {
+            if (greenBlocks.get(player.getUniqueId()) != null && greenData.get(player.getUniqueId()) != null && greenBlocks.get(player.getUniqueId()).keySet().size() > 0 && greenData.get(player.getUniqueId()).keySet().size() > 0)
+            {
+                Iterator<Map.Entry<Location, Material>> blockIterator = greenBlocks.get(player.getUniqueId()).entrySet().iterator();
+                Iterator<Location> dataIterator = greenData.get(player.getUniqueId()).keySet().iterator();
+
+                while (blockIterator.hasNext())
+                {
+                    Map.Entry<Location, Material> blockMap = blockIterator.next();
+                    Location blockLocation = blockMap.getKey();
+                    Location dataLocation = dataIterator.next();
+                    Block replaceBlock = blockLocation.getBlock();
+
+                    replaceBlock.setType(greenBlocks.get(player.getUniqueId()).get(blockLocation));
+                    replaceBlock.setData(greenData.get(player.getUniqueId()).get(dataLocation));
+
+                    blockIterator.remove();
+                    dataIterator.remove();
+                }
+            }
+            if (redBlocks.get(player.getUniqueId()) != null && redData.get(player.getUniqueId()) != null && redBlocks.get(player.getUniqueId()).keySet().size() > 0 && redData.get(player.getUniqueId()).keySet().size() > 0)
+            {
+                Iterator<Map.Entry<Location, Material>> blockIterator = redBlocks.get(player.getUniqueId()).entrySet().iterator();
+                Iterator<Location> dataIterator = redData.get(player.getUniqueId()).keySet().iterator();
+
+                while (blockIterator.hasNext())
+                {
+                    Map.Entry<Location, Material> blockMap = blockIterator.next();
+                    Location blockLocation = blockMap.getKey();
+                    Location dataLocation = dataIterator.next();
+                    Block replaceBlock = blockLocation.getBlock();
+
+                    replaceBlock.setType(redBlocks.get(player.getUniqueId()).get(blockLocation));
+                    replaceBlock.setData(redData.get(player.getUniqueId()).get(dataLocation));
+
+                    blockIterator.remove();
+                    dataIterator.remove();
+                }
             }
         }
+    }
+
+    @EventHandler
+    public void on(PlayerInteractEvent interactEvent)
+    {
+        Player player = interactEvent.getPlayer();
+        Block clickedBlock = interactEvent.getClickedBlock();
+        ProtectedRegion region = WorldGuardUtil.getRegion(player.getLocation());
+
 
         if (region != null && region.getId().startsWith("company"))
         {
@@ -393,7 +398,6 @@ public class CompanyListener implements Listener
                                             Block block = player.getWorld().getBlockAt(x, y, z);
                                             if (block.getType() == Material.THIN_GLASS)
                                             {
-                                                Vowed.LOG.debug("TRIFAEWF");
                                                 column2Hologram = HologramsAPI.createHologram(Vowed.getPlugin(), block.getLocation().add(0, .85, 0.5));
                                                 column2.put(company, column2Hologram);
                                                 column2.get(company).appendItemLine(new ItemStack(Material.WOOL, 1, (short) 14));
@@ -518,7 +522,7 @@ public class CompanyListener implements Listener
         return false;
     }
 
-    public List<Location> getSquare(Player player, Location center, int radius)
+    public List<Location> getSquare(Player player, Location center, int radius, Material material, byte data)
     {
         List<Location> locations = new ArrayList<>();
 
@@ -527,18 +531,41 @@ public class CompanyListener implements Listener
             for (int z = (int) center.getZ() - radius; z <= (int) center.getZ() + radius; z++)
             {
                 Location cord = new Location(center.getWorld(), x, center.getY(), z);
-                if (this.center.size() >= 1)
+                if (material == Material.WOOL && data == 5)
                 {
-
-                } else
+                    if (greenCenter.size() <= 0)
+                    {
+                        greenCenter.put(player.getUniqueId(), center);
+                    }
+                }
+                else if (material == Material.WOOL && data == 14)
                 {
-                    this.center.put(player.getUniqueId(), center);
+                    if (redCenter.size() <= 0)
+                    {
+                        redCenter.put(player.getUniqueId(), center);
+                    }
                 }
                 locations.add(cord);
             }
         }
 
         return locations;
+    }
+
+    public List<Block> getRedSquare(Location center, int radius)
+    {
+        List<Block> oldBlocks = new ArrayList<>();
+        for (int x = (int) center.getX() - radius; x <= (int) center.getX() + radius; x++)
+        {
+            for (int z = (int) center.getZ() - radius; z <= (int) center.getZ() + radius; z++)
+            {
+                Location cord = new Location(center.getWorld(), x, center.getY(), z);
+                Block block = cord.getBlock();
+                oldBlocks.add(block);
+            }
+        }
+
+        return oldBlocks;
     }
 
     public void createSquare(Location center, int radius, Material material, byte data)
@@ -559,19 +586,23 @@ public class CompanyListener implements Listener
 
         for (int x = (int) center.getX() - radius; x <= (int) center.getX() + radius; x++)
         {
-            for (int z = (int) center.getZ() - radius; z <= (int) center.getZ() + radius; z++)
+            for (int y = (int) center.getY() + 1; y <= (int) center.getY() + radius * 2; y++)
             {
-                Location cord = new Location(center.getWorld(), x, center.getY(), z);
-                Block block = cord.getBlock();
-                Block blockBelow = block.getRelative(BlockFace.DOWN);
-                Block blockAbove = block.getRelative(BlockFace.UP);
+                for (int z = (int) center.getZ() - radius; z <= (int) center.getZ() + radius; z++)
+                {
+                    Location cord = new Location(center.getWorld(), x, y, z);
+                    Location bottomLayer = new Location(center.getWorld(), x, center.getY(), z);
 
-                if (blockBelow.getType() != Material.AIR && blockAbove.getType() == Material.AIR)
-                {
-                    booleans.add(true);
-                } else
-                {
-                    booleans.add(false);
+                    Block block = cord.getBlock();
+                    Block blockBelow = bottomLayer.getBlock();
+
+                    if (blockBelow.getType() != Material.AIR && block.getType() == Material.AIR && blockBelow.getData() != 14)
+                    {
+                        booleans.add(true);
+                    } else
+                    {
+                        booleans.add(false);
+                    }
                 }
             }
         }

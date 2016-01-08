@@ -26,30 +26,20 @@ public class EntityShootListener implements Listener{
     }
 
     @EventHandler
-    public void onShoot(EntityShootBowEvent event){
-        if(event.getEntity() instanceof Player){
-            Player player = (Player)event.getEntity();
-            PlayerWrapper wrapper = new PlayerWrapper(player);
-            Race race = wrapper.getRace();
-            Random ran = new Random();
+    public void onShoot(EntityShootBowEvent shootEvent)
+    {
+        if(shootEvent.getEntity() instanceof Player)
+        {
+            Vector velocity = shootEvent.getProjectile().getVelocity();
+            shootEvent.getProjectile().remove();
 
-            double yaw = player.getLocation().getYaw(); //Get yaw of player, in degrees.
-            double pitch = player.getLocation().getPitch(); //Get pitch, in degrees
-            int variation = 10; //Variation in degrees
-            int var2 = variation * 2; //Used later for randomization
-            double variationYaw = ((Math.random() * var2) - variation); //Vary by between 10 and -10 degrees
-            double variationPitch = ((Math.random() * var2) - variation);
-            yaw+= variationYaw;
-            pitch+=variationPitch;
+            double speed = velocity.length();
+            Vector direction = new Vector(velocity.getX() / speed, velocity.getY() / speed, velocity.getZ() / speed);
+            double offSet = 3D;
 
-//Get vector values from rotation using sine and cosine.
-            double sinPitch = Math.sin(Math.toRadians(pitch));
-            double sinYaw = Math.sin(Math.toRadians(yaw));
-            double cosYaw = Math.cos(Math.toRadians(yaw));
+            Arrow arrow = shootEvent.getEntity().launchProjectile(Arrow.class);
+            arrow.setVelocity(new Vector(direction.getX() + (Math.random() - 0.5) / offSet, direction.getY() + (Math.random() - 0.5) / offSet, direction.getZ() + (Math.random() - 0.5) / offSet).normalize().multiply(speed));
 
-            Vector arrowVelocity = new Vector(sinYaw, sinPitch, cosYaw);
-            arrowVelocity.normalize(); //Probably not necessary, but good practise.
-            event.getProjectile().setVelocity(arrowVelocity);
         }
     }
 }

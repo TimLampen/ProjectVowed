@@ -132,7 +132,7 @@ public class TransactionUtil
 
     public static List<List<String>> getTransactions(UUID uuid) throws IOException
     {
-        File file = new File(p.getDataFolder() + "Transactions\\" + uuid.toString());
+        File file = new File("C:\\ProjectVowed\\plugins\\Vowed\\Transactions\\" + uuid.toString());
 
         List<List<String>> files = new ArrayList<>();
         if (file.listFiles() != null)

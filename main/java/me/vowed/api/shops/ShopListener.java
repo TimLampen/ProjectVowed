@@ -5,9 +5,10 @@ import me.vowed.api.player.PlayerWrapper;
 import me.vowed.api.player.PlayerWrapperManager;
 import me.vowed.api.plugin.Vowed;
 import me.vowed.api.plugin.VowedPlugin;
-import me.vowed.api.race.Race;
-import me.vowed.api.race.races.RaceType;
-import org.bukkit.*;
+import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -17,7 +18,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
@@ -27,7 +27,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -59,9 +58,12 @@ public class ShopListener implements Listener
     private HashSet<Inventory> inventories = new HashSet<>();
 
     VowedPlugin p;
-    public ShopListener(VowedPlugin p){
+
+    public ShopListener(VowedPlugin p)
+    {
         this.p = p;
     }
+
     @EventHandler
     public void on(PlayerJoinEvent joinEvent) throws IOException
     {
@@ -100,11 +102,15 @@ public class ShopListener implements Listener
 
 
     @EventHandler
-    public void onInteract(PlayerInteractEvent event){
+    public void onInteract(PlayerInteractEvent event)
+    {
         Player player = event.getPlayer();
-        if(event.getAction()==Action.RIGHT_CLICK_BLOCK){
-            if(player.isSneaking() && player.getItemInHand()!=null && player.getItemInHand().getType()==Material.BOOK){
-                if(Vowed.getShopManager().getShop(player) == null){
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK)
+        {
+            if (player.isSneaking() && player.getItemInHand() != null && player.getItemInHand().getType() == Material.BOOK)
+            {
+                if (Vowed.getShopManager().getShop(player) == null)
+                {
                     Location loc = event.getClickedBlock().getLocation();
                     IShop shop = Vowed.getShopManager().createShop(player, loc.add(0, 1, 0), ShopType.GEAR_SHOP);
                     shop.createShop();
@@ -118,8 +124,8 @@ public class ShopListener implements Listener
                     shop.setOpen(false);
                     handlingName.put(shop.getOwnerUUID(), true);
                     shop.getOwner().sendMessage(ChatColor.YELLOW.toString() + ChatColor.BOLD + "Please enter your shop's name");
-                }
-                else{
+                } else
+                {
                     player.sendMessage(ChatColor.RED + "You cannot create a shop while you already have one open!");
                 }
             }
@@ -167,8 +173,7 @@ public class ShopListener implements Listener
                             } else if (handlingName.get(player.getUniqueId()))
                             {
                                 player.sendMessage(ChatColor.RED.toString() + ChatColor.BOLD + "Please type in a valid 16 character name, or enter ' cancel '");
-                            }
-                            else
+                            } else
                             {
                                 player.sendMessage(ChatColor.RED.toString() + ChatColor.BOLD + "Please type in a valid integer, or enter ' cancel '");
                             }
@@ -179,9 +184,10 @@ public class ShopListener implements Listener
                     }
                 }
             }
-        }
-        else if(action == Action.LEFT_CLICK_BLOCK){
-            if(ShopUtils.isShop(interactEvent.getClickedBlock())){
+        } else if (action == Action.LEFT_CLICK_BLOCK)
+        {
+            if (ShopUtils.isShop(interactEvent.getClickedBlock()))
+            {
                 interactEvent.setCancelled(true);
 
                 IShop shop = Vowed.getShopManager().getShop(interactEvent.getClickedBlock().getLocation());
@@ -388,8 +394,8 @@ public class ShopListener implements Listener
 
                             shopItem.
                                     addPrice(
-                                    Integer.parseInt(chatEvent.getMessage()),
-                                    shop);
+                                            Integer.parseInt(chatEvent.getMessage()),
+                                            shop);
                             shop.addItemWithPrice(shopItem);
 
                             player.getInventory().remove(shopItem.getShopItem());
@@ -535,8 +541,8 @@ public class ShopListener implements Listener
             buyerWriter.println("Item Dwarf Price: " + shopItem.getDwarfINTPrice());
             buyerWriter.println("Item Elf Price: " + shopItem.getElfINTPrice());
             buyerWriter.println("Item Human Price: " + shopItem.getHumanINTPrice());
-            buyerWriter.println("Buyer (" +  buyer.getPlayer().getName() + ") money before: " + buyerBefore);
-            buyerWriter.println("Seller (" +  seller.getPlayer().getName() + ") money before: " + sellerBefore);
+            buyerWriter.println("Buyer (" + buyer.getPlayer().getName() + ") money before: " + buyerBefore);
+            buyerWriter.println("Seller (" + seller.getPlayer().getName() + ") money before: " + sellerBefore);
             buyerWriter.println("Buyer (" + buyer.getPlayer().getName() + ") money after: " + buyer.getMoney().getAmount());
             buyerWriter.println("Seller (" + seller.getPlayer().getName() + ") money after: " + seller.getMoney().getAmount());
             buyerWriter.println("");
@@ -552,8 +558,8 @@ public class ShopListener implements Listener
             sellerWriter.println("Item Dwarf Price: " + shopItem.getDwarfINTPrice());
             sellerWriter.println("Item Elf Price: " + shopItem.getElfINTPrice());
             sellerWriter.println("Item Human Price: " + shopItem.getHumanINTPrice());
-            sellerWriter.println("Buyer (" +  buyer.getPlayer().getName() + ") money before: " + buyerBefore);
-            sellerWriter.println("Seller (" +  seller.getPlayer().getName() + ") money before: " + sellerBefore);
+            sellerWriter.println("Buyer (" + buyer.getPlayer().getName() + ") money before: " + buyerBefore);
+            sellerWriter.println("Seller (" + seller.getPlayer().getName() + ") money before: " + sellerBefore);
             sellerWriter.println("Buyer (" + buyer.getPlayer().getName() + ") money after: " + buyer.getMoney().getAmount());
             sellerWriter.println("Seller (" + seller.getPlayer().getName() + ") money after: " + seller.getMoney().getAmount());
             sellerWriter.println("");
