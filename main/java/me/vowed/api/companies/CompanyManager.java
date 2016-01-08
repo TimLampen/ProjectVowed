@@ -14,7 +14,7 @@ import java.util.*;
  */
 public class CompanyManager
 {
-    HashMap<UUID, Company> companyOwner = new HashMap<>();
+    HashMap<UUID, List<Company>> companyOwner = new HashMap<>();
     HashMap<String, Company> companyLocation = new HashMap<>();
     List<Company> companies = new ArrayList<>();
 
@@ -22,16 +22,36 @@ public class CompanyManager
     {
         Company company = new Company(name, type, player, center, region);
 
-        companyOwner.put(player.getUniqueId(), company);
+        if (companyOwner.get(player.getUniqueId()) != null)
+        {
+            companyOwner.get(player.getUniqueId()).add(company);
+            Vowed.LOG.debug(companyOwner.toString());
+        }
+        else
+        {
+            List<Company> companies = new ArrayList<>();
+            companies.add(company);
+            companyOwner.put(player.getUniqueId(), companies);
+        }
         companyLocation.put(center.toString(), company);
         companies.add(company);
 
         return company;
     }
 
-    public Company getCompany(Player player)
+    public Company getCompany(Player player, String name)
     {
-        return companyOwner.get(player.getUniqueId());
+        Vowed.LOG.debug(companyOwner.toString());
+        for (Company company : companyOwner.get(player.getUniqueId()))
+        {
+            Vowed.LOG.debug("Company name: " + company.getName() + " Name: " + name);
+            if (company.getName().equalsIgnoreCase(name))
+            {
+                return company;
+            }
+        }
+
+        return null;
     }
 
     public Company getCompany(Location location)

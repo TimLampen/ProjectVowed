@@ -19,13 +19,13 @@ public class DeleteCommand extends SubCommand
     @Override
     public int getMinimumArguments()
     {
-        return 0;
+        return 1;
     }
 
     @Override
     public boolean onCommand(CommandSender commandSender, String[] args)
     {
-        Company company = Vowed.getCompanyManager().getCompany((Player) commandSender);
+        Company company = Vowed.getCompanyManager().getCompany((Player) commandSender, args[2]);
 
         if (company != null)
         {
@@ -33,6 +33,7 @@ public class DeleteCommand extends SubCommand
             return true;
         }
 
+        Vowed.LOG.debug("ok?");
         return false;
     }
 }

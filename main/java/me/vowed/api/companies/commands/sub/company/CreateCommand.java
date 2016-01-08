@@ -45,6 +45,7 @@ public class CreateCommand extends SubCommand
         assert worldGuard != null;
         assert worldEdit != null;
 
+
         Selection selection = worldEdit.getSelection((Player) commandSender);
 
         Location minimumPoint = selection.getMinimumPoint();
