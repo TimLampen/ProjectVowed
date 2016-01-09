@@ -54,6 +54,11 @@ public class CompanyManager
         return null;
     }
 
+    public Company getNewestCompany(Player player)
+    {
+        return companyOwner.get(player.getUniqueId()).get(companyOwner.get(player.getUniqueId()).size() - 1);
+    }
+
     public Company getCompany(Location location)
     {
         if (companyLocation.containsKey(location.toString()))

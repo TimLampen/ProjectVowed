@@ -2,15 +2,24 @@ package me.vowed.api.companies;
 
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
+import com.sk89q.worldedit.*;
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import me.vowed.api.companies.commands.sub.company.CreateCommand;
+import me.vowed.api.companies.types.CompanyType;
 import me.vowed.api.plugin.Vowed;
+import me.vowed.api.utils.bukkit.BukkitUtil;
 import me.vowed.api.utils.worldguard.WorldGuardUtil;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.npc.ai.speech.Chat;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -23,6 +32,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Door;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.*;
+import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 
 import java.util.*;
@@ -47,6 +57,13 @@ public class CompanyListener implements Listener
     HashMap<UUID, Boolean> handleGreen = new HashMap<>();
     HashMap<UUID, Boolean> handleRed = new HashMap<>();
 
+    HashMap<Location, Integer> maximumCenterX = new HashMap<>();
+    HashMap<Location, Integer> maximumCenterZ = new HashMap<>();
+    HashMap<Location, Integer> maximumCenterY = new HashMap<>();
+
+    HashMap<Location, Integer> minimumCenterX = new HashMap<>();
+    HashMap<Location, Integer> minimumCenterZ = new HashMap<>();
+    HashMap<Location, Integer> minimumCenterY = new HashMap<>();
 
     @EventHandler
     public void on(PlayerMoveEvent moveEvent)
@@ -54,11 +71,11 @@ public class CompanyListener implements Listener
 
         Player player = moveEvent.getPlayer();
 
-        if (player.getItemInHand() != null && player.getItemInHand().getType() != Material.AIR && player.getItemInHand().getItemMeta().getLore() != null && player.getItemInHand().getItemMeta().getLore().contains("Selector"))
+        if (player.getItemInHand() != null && player.getItemInHand().getType() != Material.AIR && player.getItemInHand().getItemMeta().getDisplayName() != null && player.getItemInHand().getItemMeta().getDisplayName().contains(ChatColor.GOLD.toString() + ChatColor.BOLD + "Selector"))
         {
             Location location = player.getTargetBlock((HashSet<Byte>) null, 5).getLocation();
 
-            if (isFlat(location, 5))
+            if (isFlat(location, getRadius(CreateCommand.type)))
             {
                 //removing redblocks if there are any because isFlat is true
                 if (redBlocks.get(player.getUniqueId()) != null && redData.get(player.getUniqueId()) != null && redBlocks.get(player.getUniqueId()).keySet().size() >= 1 && redData.get(player.getUniqueId()).keySet().size() >= 1)
@@ -82,14 +99,13 @@ public class CompanyListener implements Listener
                 }
 
                 //adding the greenblocks to the map
-
                 if (greenBlocks.get(player.getUniqueId()) != null && greenData.get(player.getUniqueId()) != null)
                 {
                     if (greenBlocks.get(player.getUniqueId()).isEmpty())
                     {
                         if ((!greenBlocks.get(player.getUniqueId()).containsKey(location) && !greenData.get(player.getUniqueId()).containsKey(location)))
                         {
-                            for (Location locations : getSquare(player, location, 5, Material.WOOL, (byte) 5))
+                            for (Location locations : getSquare(player, location, getRadius(CreateCommand.type), Material.WOOL, (byte) 5))
                             {
                                 greenBlocks.get(player.getUniqueId()).put(locations, locations.getBlock().getType());
 
@@ -101,7 +117,7 @@ public class CompanyListener implements Listener
                 {
                     Map<Location, Material> blockMaterial = new HashMap<>();
                     Map<Location, Byte> blockData = new HashMap<>();
-                    for (Location locations : getSquare(player, location, 5, Material.WOOL, (byte) 5))
+                    for (Location locations : getSquare(player, location, getRadius(CreateCommand.type), Material.WOOL, (byte) 5))
                     {
                         if (locations.getBlock().getType() != Material.WOOL)
                         {
@@ -120,7 +136,7 @@ public class CompanyListener implements Listener
                 {
                     if (handleGreen.get(player.getUniqueId()))
                     {
-                        createSquare(location, 5, Material.WOOL, (byte) 5);
+                        createSquare(location, getRadius(CreateCommand.type), Material.WOOL, (byte) 5);
                     }
                 }
 
@@ -198,7 +214,7 @@ public class CompanyListener implements Listener
                     {
                         if ((!redBlocks.get(player.getUniqueId()).containsKey(location) && !redData.get(player.getUniqueId()).containsKey(location)))
                         {
-                            for (Location locations : getSquare(player, location, 5, Material.WOOL, (byte) 14))
+                            for (Location locations : getSquare(player, location, getRadius(CreateCommand.type), Material.WOOL, (byte) 14))
                             {
                                 redBlocks.get(player.getUniqueId()).put(locations, locations.getBlock().getType());
 
@@ -210,7 +226,7 @@ public class CompanyListener implements Listener
                 {
                     Map<Location, Material> blockMaterial = new HashMap<>();
                     Map<Location, Byte> blockData = new HashMap<>();
-                    for (Location locations : getSquare(player, location, 5, Material.WOOL, (byte) 14))
+                    for (Location locations : getSquare(player, location, getRadius(CreateCommand.type), Material.WOOL, (byte) 14))
                     {
                         if (locations.getBlock().getType() != Material.WOOL)
                         {
@@ -228,7 +244,7 @@ public class CompanyListener implements Listener
                 {
                     if (handleRed.get(player.getUniqueId()))
                     {
-                        createSquare(location, 5, Material.WOOL, (byte) 14);
+                        createSquare(location, getRadius(CreateCommand.type), Material.WOOL, (byte) 14);
                     }
                 }
 
@@ -314,6 +330,27 @@ public class CompanyListener implements Listener
         Block clickedBlock = interactEvent.getClickedBlock();
         ProtectedRegion region = WorldGuardUtil.getRegion(player.getLocation());
 
+        if (interactEvent.getAction() == Action.LEFT_CLICK_BLOCK && player.getItemInHand().getItemMeta().getDisplayName() != null && player.getItemInHand().getItemMeta().getDisplayName().contains(ChatColor.GOLD.toString() + ChatColor.BOLD + "Selector"))
+        {
+            if (isFlat(clickedBlock.getLocation(), getRadius(CreateCommand.type)))
+            {
+                player.sendMessage(ChatColor.GOLD.toString() + ChatColor.BOLD + "Creating your company now!");
+                createCompany(player, greenCenter.get(player.getUniqueId()));
+
+                for (ItemStack itemStack : player.getInventory().getContents())
+                {
+                    if (itemStack.getItemMeta().getDisplayName().contains(ChatColor.GOLD.toString() + ChatColor.BOLD + "Selector"))
+                    {
+                        player.getInventory().remove(itemStack);
+                    }
+                }
+            }
+            else
+            {
+                player.sendMessage(ChatColor.RED.toString() + ChatColor.BOLD + "Sorry, your company will not fit here");
+            }
+        }
+
 
         if (region != null && region.getId().startsWith("company"))
         {
@@ -321,7 +358,7 @@ public class CompanyListener implements Listener
             {
                 if (isDoor(interactEvent) && WorldGuardUtil.isOwner(player, region))
                 {
-
+                    Vowed.LOG.debug("wtf");
                     Door door = new Door(0, clickedBlock.getData());
                     Block otherHalf;
 
@@ -580,6 +617,47 @@ public class CompanyListener implements Listener
         }
     }
 
+    public void createCompany(Player player, Location center)
+    {
+        center.add(0, 1, 0);
+        setBounds(center, 20);
+        com.sk89q.worldedit.BlockVector minimumBlockVector = new com.sk89q.worldedit.BlockVector(minimumCenterX.get(center), minimumCenterY.get(center), minimumCenterZ.get(center));
+        com.sk89q.worldedit.BlockVector maximumBlockVector = new com.sk89q.worldedit.BlockVector(maximumCenterX.get(center), maximumCenterY.get(center), maximumCenterZ.get(center));
+
+        final ProtectedCuboidRegion cuboidRegion = new ProtectedCuboidRegion("company_" + CreateCommand.name, minimumBlockVector, maximumBlockVector);
+        WorldGuardUtil.getWorldGuard().getRegionManager(player.getWorld()).addRegion(cuboidRegion);
+        cuboidRegion.getOwners().addPlayer(player.getUniqueId());
+
+        Company company = Vowed.getCompanyManager().getInstance(CreateCommand.name, CreateCommand.type, player, center, cuboidRegion);
+
+        NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, company.getOwner().getName() + "'s Builder");
+
+        npc.spawn(center);
+
+        BukkitUtil.sendCommand("npc select " + npc.getId());
+        BukkitUtil.sendCommand("trait builder");
+        BukkitUtil.sendCommand("builder timeout 0");
+
+        new BukkitRunnable()
+        {
+            @Override
+            public void run()
+            {
+                switch (company.getType())
+                {
+                    case ARMOURY:
+                        BukkitUtil.sendCommand("builder load Armoury");
+                        break;
+
+                    case FOOD:
+                        BukkitUtil.sendCommand("builder load Food");
+                }
+                BukkitUtil.sendCommand("builder origin " + center.getX() + "," + center + "," + center.getZ());
+                BukkitUtil.sendCommand("builder build excavate");
+            }
+        }.runTaskLater(Vowed.getPlugin(), 60);
+    }
+
     public boolean isFlat(Location center, int radius)
     {
         List<Boolean> booleans = new ArrayList<>();
@@ -607,5 +685,56 @@ public class CompanyListener implements Listener
             }
         }
         return !booleans.contains(false);
+    }
+
+    public void setBounds(Location center, int radius)
+    {
+        for (int x = (int) center.getX() - radius; x <= (int) center.getX() + radius; x++)
+        {
+            for (int y = (int) center.getY(); y <= (int) center.getY() + radius * 2; y++)
+            {
+                for (int z = (int) center.getZ() - radius; z <= (int) center.getZ() + radius; z++)
+                {
+                    if (x == (center.getX() + radius))
+                    {
+                        maximumCenterX.put(center, x);
+                    }
+                    if (z == (center.getZ() + radius))
+                    {
+                        maximumCenterZ.put(center, z);
+                    }
+                    if (y == (center.getY() + radius * 2))
+                    {
+                        maximumCenterY.put(center, y);
+                    }
+                    if (x == (center.getX() - radius))
+                    {
+                        minimumCenterX.put(center, x);
+                    }
+                    if (z == (center.getZ() - radius))
+                    {
+                        minimumCenterZ.put(center, z);
+                    }
+                    if (y == (center.getY()))
+                    {
+                        minimumCenterY.put(center, y);
+                    }
+                }
+            }
+        }
+    }
+
+    public int getRadius(CompanyType type)
+    {
+        switch (type)
+        {
+            case FOOD:
+                return 6;
+
+            case ARMOURY:
+                return 10;
+        }
+
+        return 0;
     }
 }
