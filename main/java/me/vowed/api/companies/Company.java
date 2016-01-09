@@ -143,8 +143,7 @@ public class Company
             while (companyIterator.hasNext())
             {
                 Company company = companyIterator.next();
-
-
+                
                 if (company.getName().equals(getName()))
                 {
                     companyIterator.remove();

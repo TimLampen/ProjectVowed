@@ -2,6 +2,7 @@ package me.vowed.api.companies.commands;
 
 import me.vowed.api.companies.commands.help.CompanyHelpCommand;
 import me.vowed.api.companies.commands.parent.CompanyCommand;
+import me.vowed.api.companies.commands.parent.ItemCommand;
 import me.vowed.api.companies.commands.parent.ParentCommand;
 import me.vowed.api.companies.commands.help.MainHelpCommand;
 import me.vowed.api.companies.commands.sub.SubCommand;
@@ -19,6 +20,7 @@ import java.util.*;
 public class CommandManager implements CommandExecutor
 {
     CompanyCommand companyCommand = new CompanyCommand("company");
+    ItemCommand itemCommand = new ItemCommand("item");
     MainHelpCommand mainHelpCommand = new MainHelpCommand("help", this);
 
     public final Map<ParentCommand, List<SubCommand>> commands = new HashMap<>();
@@ -38,6 +40,8 @@ public class CommandManager implements CommandExecutor
         {
             case "company":
                 return companyCommand;
+            case "item":
+                return itemCommand;
         }
 
         return null;
@@ -51,6 +55,11 @@ public class CommandManager implements CommandExecutor
     public CompanyCommand getCompanyCommand()
     {
         return companyCommand;
+    }
+
+    public ItemCommand getItemCommand()
+    {
+        return itemCommand;
     }
 
     @Override
