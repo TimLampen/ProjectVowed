@@ -86,10 +86,7 @@ public class Company
         this.owner = owner;
     }
 
-    public void setOpen(boolean open)
-    {
-        this.open = open;
-    }
+    public void setOpen(boolean open){ this.open = open; }
 
     public void setLocation(Location centerLocation)
     {

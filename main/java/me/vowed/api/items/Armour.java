@@ -49,7 +49,7 @@ public class Armour implements IArmour
             case "leggings":
                 generateLeggings(ArmourTier.TIER1, getLore(), getName());
                 break;
-            case "chestPlate":
+            case "chestplate":
                 generateChestPlate(ArmourTier.TIER1, getLore(), getName());
                 break;
             case "helmet":
